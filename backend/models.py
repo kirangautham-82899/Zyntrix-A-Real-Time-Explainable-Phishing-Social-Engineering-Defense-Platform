@@ -54,7 +54,7 @@ class ScanHistory(BaseModel):
     ip_address: Optional[str] = None
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
@@ -73,7 +73,7 @@ class ThreatReport(BaseModel):
     organization_id: Optional[str] = None
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
@@ -92,7 +92,7 @@ class User(BaseModel):
     settings: Optional[Dict] = None
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
@@ -116,7 +116,7 @@ class Organization(BaseModel):
     is_active: bool = True
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
@@ -134,7 +134,7 @@ class Policy(BaseModel):
     created_by: str  # User ID
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
@@ -152,7 +152,7 @@ class ThreatIntelligence(BaseModel):
     is_active: bool = True
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
@@ -172,7 +172,7 @@ class BehavioralProfile(BaseModel):
     training_data_count: int = 0
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
@@ -190,7 +190,7 @@ class AuditLog(BaseModel):
     status: str = 'success'  # 'success', 'failure'
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
@@ -208,6 +208,6 @@ class AnalyticsEvent(BaseModel):
     metadata: Optional[Dict] = None
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
