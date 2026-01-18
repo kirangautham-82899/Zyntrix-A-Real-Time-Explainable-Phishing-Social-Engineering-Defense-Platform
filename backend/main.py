@@ -1,27 +1,50 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Depends, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
-from url_analyzer import url_analyzer
-from email_analyzer import email_analyzer
-from sms_analyzer import sms_analyzer
-from ml_models import ml_classifier
-from database import database
-from cache import cache
+from backend.url_analyzer import url_analyzer
+from backend.email_analyzer import email_analyzer
+from backend.sms_analyzer import sms_analyzer
+from backend.ml_models import ml_classifier
+from backend.database import database
+from backend.cache import cache
+from backend.validation import validator
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from backend.auth import (
+    get_current_user, create_access_token, create_refresh_token,
+    verify_password, get_password_hash, decode_token,
+    UserCreate, UserLogin, Token, TokenData
+)
+from backend.models import User
+from backend.admin_api import router as admin_router
+from bson import ObjectId
+from backend.behavioral_analyzer import behavioral_analyzer
 
 # Load environment variables
 load_dotenv()
+
+# Initialize rate limiter
+limiter = Limiter(key_func=get_remote_address)
 
 # Create FastAPI app
 app = FastAPI(
     title="ZYNTRIX API",
     description="Real-Time Cyber Safety Platform - AI-powered phishing and social engineering detection",
-    version="1.0.0",
+    version="2.0.0",
     docs_url="/api/docs",
     redoc_url="/api/redoc"
 )
+
+# Mount admin router
+app.include_router(admin_router)
+
+# Add rate limiter to app
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS Configuration for Next.js
 origins = [
@@ -85,13 +108,23 @@ async def root():
     """Root endpoint - API information"""
     return {
         "name": "ZYNTRIX API",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "description": "Real-Time Cyber Safety Platform",
         "endpoints": {
             "health": "/api/health",
             "docs": "/api/docs",
             "redoc": "/api/redoc",
-            "analyze_url": "/api/analyze/url"
+            "auth": {
+                "register": "/api/auth/register",
+                "login": "/api/auth/login",
+                "me": "/api/auth/me"
+            },
+            "analysis": {
+                "url": "/api/analyze/url",
+                "email": "/api/analyze/email",
+                "sms": "/api/analyze/sms"
+            },
+            "admin": "/api/admin/*"
         }
     }
 
@@ -108,7 +141,7 @@ async def health_check():
         timestamp=datetime.utcnow().isoformat(),
         version="1.0.0",
         services={
-            "mongodb": "connected" if database.db else "disconnected",
+            "mongodb": "connected" if database.db is not None else "disconnected",
             "redis": "connected" if cache.connected else "disconnected",
             "ml_engine": "ready"
         }
@@ -149,10 +182,13 @@ async def test_connection():
     }
 
 # URL Analysis endpoint
-@app.post("/api/analyze/url", response_model=URLAnalysisResponse)
-async def analyze_url(request: URLAnalysisRequest):
+@app.post("/api/analyze/url")
+@limiter.limit("10/minute")
+async def analyze_url(request: Request, url_request: URLAnalysisRequest):
     """
     Analyze URL for phishing and malicious patterns
+    
+    Rate Limited: 10 requests per minute per IP
     
     Returns:
     - risk_score: 0-100 (0=safe, 100=dangerous)
@@ -161,8 +197,16 @@ async def analyze_url(request: URLAnalysisRequest):
     - detailed analysis results
     """
     try:
+        # Validate input
+        is_valid, error_msg = validator.validate_url(url_request.url)
+        if not is_valid:
+            raise HTTPException(status_code=400, detail=error_msg)
+        
+        # Sanitize URL
+        sanitized_url = validator.sanitize_string(url_request.url, validator.MAX_URL_LENGTH)
+        
         # Check cache first
-        cache_key = cache.generate_cache_key('url', request.url)
+        cache_key = cache.generate_cache_key('url', sanitized_url)
         cached_result = cache.get(cache_key)
         
         if cached_result:
@@ -175,7 +219,7 @@ async def analyze_url(request: URLAnalysisRequest):
             }
         
         # Analyze the URL
-        result = url_analyzer.analyze(request.url)
+        result = url_analyzer.analyze(sanitized_url)
         
         if not result['valid']:
             raise HTTPException(status_code=400, detail=result.get('error', 'Invalid URL'))
@@ -244,21 +288,26 @@ def _generate_recommendations(risk_level: str) -> list:
 
 # Email Analysis endpoint
 @app.post("/api/analyze/email")
-async def analyze_email(request: EmailAnalysisRequest):
+@limiter.limit("10/minute")
+async def analyze_email(request: Request, email_request: EmailAnalysisRequest):
     """
-    Analyze email content for phishing and social engineering
-    
-    Returns:
-    - risk_score: 0-100 (0=safe, 100=dangerous)
-    - risk_level: safe, suspicious, or dangerous
-    - factors: List of detection factors
-    - keyword analysis and sender verification
+    Analyze email for phishing patterns
+    Rate Limited: 10 requests per minute per IP
     """
     try:
+        # Validate input
+        is_valid, error_msg = validator.validate_email_content(email_request.email_content, email_request.sender_email)
+        if not is_valid:
+            raise HTTPException(status_code=400, detail=error_msg)
+        
+        # Sanitize inputs
+        sanitized_content = validator.sanitize_string(email_request.email_content, validator.MAX_EMAIL_LENGTH)
+        sanitized_sender = validator.sanitize_string(email_request.sender_email, validator.MAX_SENDER_LENGTH) if email_request.sender_email else None
+        
         # Analyze the email
         result = email_analyzer.analyze(
-            email_content=request.email_content,
-            sender_email=request.sender_email
+            email_content=sanitized_content,
+            sender_email=sanitized_sender
         )
         
         if not result['valid']:
@@ -305,21 +354,26 @@ def _generate_email_explanation(result: dict) -> str:
 
 # SMS Analysis endpoint
 @app.post("/api/analyze/sms")
-async def analyze_sms(request: SMSAnalysisRequest):
+@limiter.limit("10/minute")
+async def analyze_sms(request: Request, sms_request: SMSAnalysisRequest):
     """
-    Analyze SMS/text message for scams and social engineering
-    
-    Returns:
-    - risk_score: 0-100 (0=safe, 100=dangerous)
-    - risk_level: safe, suspicious, or dangerous
-    - factors: List of detection factors
-    - keyword analysis and pattern detection
+    Analyze SMS for scam patterns
+    Rate Limited: 10 requests per minute per IP
     """
     try:
+        # Validate input
+        is_valid, error_msg = validator.validate_sms_content(sms_request.sms_content, sms_request.sender_number)
+        if not is_valid:
+            raise HTTPException(status_code=400, detail=error_msg)
+        
+        # Sanitize inputs
+        sanitized_content = validator.sanitize_string(sms_request.sms_content, validator.MAX_SMS_LENGTH)
+        sanitized_sender = validator.sanitize_string(sms_request.sender_number, validator.MAX_SENDER_LENGTH) if sms_request.sender_number else None
+        
         # Analyze the SMS
         result = sms_analyzer.analyze(
-            sms_content=request.sms_content,
-            sender_number=request.sender_number
+            sms_content=sanitized_content,
+            sender_number=sanitized_sender
         )
         
         if not result['valid']:
@@ -365,6 +419,186 @@ def _generate_sms_explanation(result: dict) -> str:
         return f"This SMS shows suspicious characteristics with a risk score of {score}/100. Found {keyword_count} suspicious keywords and {scam_patterns} scam pattern(s). Exercise caution before responding or clicking links."
     else:
         return f"This SMS is highly suspicious with a risk score of {score}/100. Multiple red flags including {keyword_count} suspicious keywords and {scam_patterns} scam pattern(s) indicate potential scam or social engineering attack."
+
+# ============================================================================
+# AUTHENTICATION ENDPOINTS
+# ============================================================================
+
+@app.post("/api/auth/register", response_model=Token)
+async def register(user_data: UserCreate):
+    """Register a new user"""
+    # Check if user already exists
+    existing = await database.db.users.find_one({"email": user_data.email})
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail="User with this email already exists"
+        )
+    
+    # Create user
+    user = User(
+        email=user_data.email,
+        username=user_data.username,
+        password_hash=get_password_hash(user_data.password),
+        role=user_data.role,
+        organization_id=user_data.organization_id
+    )
+    
+    result = await database.db.users.insert_one(user.dict(by_alias=True))
+    user_id = str(result.inserted_id)
+    
+    # Create tokens
+    access_token = create_access_token(
+        data={
+            "sub": user_id,
+            "email": user_data.email,
+            "role": user_data.role,
+            "organization_id": user_data.organization_id
+        }
+    )
+    refresh_token = create_refresh_token(
+        data={"sub": user_id}
+    )
+    
+    # Log event
+    await database.log_event({
+        "event_type": "user_register",
+        "user_id": user_id,
+        "details": {"email": user_data.email}
+    })
+    
+    return Token(
+        access_token=access_token,
+        token_type="bearer",
+        refresh_token=refresh_token
+    )
+
+@app.post("/api/auth/login", response_model=Token)
+async def login(credentials: UserLogin, background_tasks: BackgroundTasks):
+    """Login user and return JWT tokens"""
+    # Trigger behavioral analysis
+    # Note: user_id is not available until we find the user, so we'll do it after finding user
+    # Logic continues below...
+    # Fallback for when Database is offline (Demo Mode)
+    if database.db is None:
+        if credentials.email == "admin@zyntrix.com" and credentials.password == "admin123":
+            user_id = "demo_admin_id"
+            access_token = create_access_token(
+                data={
+                    "sub": user_id,
+                    "email": credentials.email,
+                    "role": "admin",
+                    "organization_id": "demo_org"
+                }
+            )
+            return Token(
+                access_token=access_token,
+                token_type="bearer",
+                refresh_token="demo_refresh_token"
+            )
+        else:
+             raise HTTPException(
+                status_code=401,
+                detail="Database offline. Use email: admin@zyntrix.com, password: admin123"
+            )
+
+    # Find user
+    user = await database.db.users.find_one({"email": credentials.email})
+    
+    if not user or not verify_password(credentials.password, user['password_hash']):
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect email or password"
+        )
+    
+    if not user.get('is_active', True):
+        raise HTTPException(
+            status_code=403,
+            detail="User account is disabled"
+        )
+    
+    user_id = str(user['_id'])
+    
+    # Update last login
+    await database.db.users.update_one(
+        {"_id": user['_id']},
+        {"$set": {"last_login": datetime.utcnow()}}
+    )
+    
+    # Create tokens
+    access_token = create_access_token(
+        data={
+            "sub": user_id,
+            "email": user['email'],
+            "role": user.get('role', 'user'),
+            "organization_id": user.get('organization_id')
+        }
+    )
+    refresh_token = create_refresh_token(
+        data={"sub": user_id}
+    )
+    
+    # Log event
+    await database.log_event({
+        "event_type": "user_login",
+        "user_id": user_id,
+        "details": {"email": user['email']}
+    })
+
+    # Trigger behavioral analysis
+    background_tasks.add_task(behavioral_analyzer.analyze_user_event, user_id, "login")
+    
+    return Token(
+        access_token=access_token,
+        token_type="bearer",
+        refresh_token=refresh_token
+    )
+
+@app.post("/api/auth/refresh", response_model=Token)
+async def refresh_token_endpoint(refresh_token: str):
+    """Refresh access token using refresh token"""
+    try:
+        token_data = decode_token(refresh_token)
+        
+        # Get user
+        user = await database.db.users.find_one({"_id": ObjectId(token_data.user_id)})
+        
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+        
+        # Create new access token
+        access_token = create_access_token(
+            data={
+                "sub": str(user['_id']),
+                "email": user['email'],
+                "role": user.get('role', 'user'),
+                "organization_id": user.get('organization_id')
+            }
+        )
+        
+        return Token(
+            access_token=access_token,
+            token_type="bearer"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+@app.get("/api/auth/me")
+async def get_current_user_info(current_user: TokenData = Depends(get_current_user)):
+    """Get current authenticated user information"""
+    user = await database.db.users.find_one({"_id": ObjectId(current_user.user_id)})
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Remove sensitive data
+    user['_id'] = str(user['_id'])
+    user.pop('password_hash', None)
+    
+    return {
+        "success": True,
+        "data": user
+    }
 
 if __name__ == "__main__":
     import uvicorn

@@ -66,7 +66,7 @@ export default function ThreatExplanation({
         }
     };
 
-    const Icon = getRiskIcon();
+    const RiskIcon = getRiskIcon();
     const colors = getRiskColor();
 
     return (
@@ -75,7 +75,7 @@ export default function ThreatExplanation({
             <Card variant="glow" className={`border-l-4 ${colors.border}`}>
                 <div className="flex items-start gap-4">
                     <div className={`w-16 h-16 rounded-full ${colors.bg} flex items-center justify-center flex-shrink-0`}>
-                        <Icon className={`w-8 h-8 ${colors.icon}`} />
+                        <RiskIcon className={`w-8 h-8 ${colors.icon}`} />
                     </div>
 
                     <div className="flex-1">
@@ -113,8 +113,8 @@ export default function ThreatExplanation({
                             <div key={index} className="glass rounded-lg p-3 hover:bg-dark-800/50 transition-colors">
                                 <div className="flex items-start gap-3">
                                     <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${factor.impact === 'positive' ? 'bg-success-500' :
-                                            factor.impact === 'negative' ? 'bg-danger-500' :
-                                                'bg-dark-500'
+                                        factor.impact === 'negative' ? 'bg-danger-500' :
+                                            'bg-dark-500'
                                         }`}></div>
 
                                     <div className="flex-1">

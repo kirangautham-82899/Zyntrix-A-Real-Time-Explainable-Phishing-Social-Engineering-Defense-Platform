@@ -8,6 +8,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from typing import Optional, List, Dict
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
+import certifi
 
 load_dotenv()
 
@@ -26,18 +27,30 @@ class Database:
                 print("Warning: MONGODB_URL not configured")
                 return
             
+            
             cls.client = AsyncIOMotorClient(
                 mongodb_url,
-                tlsAllowInvalidCertificates=True  # For development
+                tls=True,
+                tlsAllowInvalidCertificates=True,
+                tlsCAFile=certifi.where(),
+                serverSelectionTimeoutMS=5000  # 5 second timeout
             )
             cls.db = cls.client.zyntrix
             
-            # Create indexes
-            await cls._create_indexes()
-            
-            print("✅ Connected to MongoDB")
+            # Create indexes with timeout
+            import asyncio
+            try:
+                await asyncio.wait_for(cls._create_indexes(), timeout=5.0)
+                print("✅ Connected to MongoDB")
+            except asyncio.TimeoutError:
+                print("⚠️ MongoDB connection timed out - Running in OFFLINE MODE")
+                cls.db = None
+            except Exception as e:
+                print(f"⚠️ MongoDB connection error: {e} - Running in OFFLINE MODE")
+                cls.db = None
         except Exception as e:
-            print(f"❌ MongoDB connection failed: {e}")
+             print(f"❌ Database init failed: {e}")
+             cls.db = None
     
     @classmethod
     async def close_db(cls):

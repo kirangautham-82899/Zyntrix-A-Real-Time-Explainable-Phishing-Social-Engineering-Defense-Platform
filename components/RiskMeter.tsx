@@ -20,6 +20,9 @@ export default function RiskMeter({
     // Animate score counting up
     useEffect(() => {
         if (!animated) {
+            // Use setTimeout to avoid synchronous setState warning if needed, 
+            // or rely on initial state if score doesn't change after mount.
+            // But since score helps update, we should check if it's different.
             setDisplayScore(score);
             return;
         }

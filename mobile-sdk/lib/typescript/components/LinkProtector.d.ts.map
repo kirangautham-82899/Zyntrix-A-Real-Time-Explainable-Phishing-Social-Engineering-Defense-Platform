@@ -1,0 +1,1 @@
+{"version":3,"file":"LinkProtector.d.ts","sourceRoot":"","sources":["../../../src/components/LinkProtector.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAmB,MAAM,OAAO,CAAC;AAKxC,UAAU,kBAAkB;IACxB,GAAG,EAAE,MAAM,CAAC;IACZ,QAAQ,EAAE,KAAK,CAAC,SAAS,CAAC;IAC1B,KAAK,CAAC,EAAE,GAAG,CAAC;CACf;AAED,eAAO,MAAM,aAAa,EAAE,KAAK,CAAC,EAAE,CAAC,kBAAkB,CAqCtD,CAAC"}

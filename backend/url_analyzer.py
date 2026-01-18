@@ -15,7 +15,7 @@ class URLAnalyzer:
     # Suspicious keywords commonly found in phishing URLs
     SUSPICIOUS_KEYWORDS = [
         'verify', 'account', 'update', 'confirm', 'login', 'signin', 'banking',
-        'secure', 'ebayisapi', 'webscr', 'password', 'credential', 'urgent',
+        'ebayisapi', 'webscr', 'password', 'credential', 'urgent',
         'suspended', 'locked', 'unusual', 'click', 'here', 'now', 'immediately',
         'validate', 'restore', 'limited', 'expire', 'alert', 'notification'
     ]
@@ -29,7 +29,9 @@ class URLAnalyzer:
     # Trusted domains (whitelist)
     TRUSTED_DOMAINS = [
         'google.com', 'facebook.com', 'amazon.com', 'microsoft.com', 'apple.com',
-        'github.com', 'stackoverflow.com', 'wikipedia.org', 'youtube.com'
+        'github.com', 'stackoverflow.com', 'wikipedia.org', 'youtube.com',
+        'twitter.com', 'linkedin.com', 'instagram.com', 'reddit.com', 'netflix.com',
+        'paypal.com', 'ebay.com', 'yahoo.com', 'bing.com', 'adobe.com', 'dropbox.com'
     ]
     
     def __init__(self):
