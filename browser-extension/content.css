@@ -1,0 +1,94 @@
+/* ZYNTRIX Warning Overlay Styles */
+#zyntrix-warning-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(10, 10, 20, 0.98);
+    z-index: 2147483647;
+    /* Max z-index */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+.zyntrix-content {
+    background: #111;
+    padding: 40px;
+    border-radius: 16px;
+    border: 1px solid #ef4444;
+    box-shadow: 0 0 50px rgba(239, 68, 68, 0.3);
+    max-width: 600px;
+    width: 90%;
+}
+
+.zyntrix-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    color: #ef4444;
+}
+
+.zyntrix-title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    color: #ef4444;
+}
+
+.zyntrix-message {
+    font-size: 18px;
+    margin-bottom: 30px;
+    line-height: 1.5;
+    color: #e5e5e5;
+}
+
+.zyntrix-score {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ef4444;
+    margin-bottom: 30px;
+    display: block;
+}
+
+.zyntrix-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.zyntrix-btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-size: 16px;
+    transition: all 0.2s;
+}
+
+.zyntrix-btn-safe {
+    background: #3b82f6;
+    color: white;
+}
+
+.zyntrix-btn-safe:hover {
+    background: #2563eb;
+    transform: scale(1.05);
+}
+
+.zyntrix-btn-danger {
+    background: transparent;
+    color: #9ca3af;
+    border: 1px solid #4b5563;
+}
+
+.zyntrix-btn-danger:hover {
+    color: white;
+    border-color: white;
+}

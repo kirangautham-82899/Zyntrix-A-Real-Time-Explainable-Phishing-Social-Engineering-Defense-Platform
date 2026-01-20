@@ -1,0 +1,46 @@
+{
+    "manifest_version": 3,
+    "name": "ZYNTRIX Real-Time Shield",
+    "version": "1.0",
+    "description": "Real-time phishing and social engineering protection",
+    "permissions": [
+        "tabs",
+        "scripting",
+        "storage"
+    ],
+    "host_permissions": [
+        "<all_urls>",
+        "http://localhost:8000/*"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "css": [
+                "content.css"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "run_at": "document_start"
+        }
+    ],
+    "icons": {
+        "16": "icons/logo_16.png",
+        "48": "icons/logo_48.png",
+        "128": "icons/logo_128.png"
+    },
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "ZYNTRIX Protection",
+        "default_icon": {
+            "16": "icons/logo_16.png",
+            "48": "icons/logo_48.png",
+            "128": "icons/logo_128.png"
+        }
+    }
+}
