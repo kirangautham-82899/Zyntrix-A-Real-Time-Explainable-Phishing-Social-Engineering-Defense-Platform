@@ -33,10 +33,13 @@ async function handleUrlCheck(url, sendResponse) {
     }
 
     // Skip analyzing internal pages
-    if (url.startsWith('chrome://') || url.startsWith('edge://') || url.startsWith('about:') || url.includes('localhost:3000')) {
+    if (url.startsWith('chrome://') || url.startsWith('edge://') || url.startsWith('about:') || url.includes('localhost:3000') || url.includes('localhost:3001')) {
+        console.log('⏭️ Skipping internal URL:', url);
         sendResponse({ status: 'safe', score: 0 });
         return;
     }
+
+    console.log('🔍 Checking URL:', url);
 
     try {
         const response = await fetch(API_URL, {
@@ -48,22 +51,26 @@ async function handleUrlCheck(url, sendResponse) {
         });
 
         if (!response.ok) {
-            console.error('API Error:', response.statusText);
+            console.error('❌ API Error:', response.statusText);
             sendResponse({ status: 'error' });
             return;
         }
 
         const data = await response.json();
+        console.log('📊 API Response:', data);
+        console.log('⚠️ Risk Score:', data.data?.risk_score);
 
-        // Determine if dangerous based on ZYNTRIX score
-        // Thresholds: Safe < 30, Suspicious 30-70, Dangerous > 70
-        if (data.data && data.data.risk_score > 60) {
+        // VERY LOW THRESHOLD: Block if score > 20 (was 40)
+        // This makes extension block most suspicious URLs
+        if (data.data && data.data.risk_score > 20) {
+            console.log('🚫 BLOCKING - Risk score too high!');
             sendResponse({
                 status: 'dangerous',
                 score: data.data.risk_score,
                 details: data.data
             });
         } else {
+            console.log('✅ ALLOWING - Risk score acceptable');
             sendResponse({
                 status: 'safe',
                 score: data.data ? data.data.risk_score : 0
@@ -71,7 +78,7 @@ async function handleUrlCheck(url, sendResponse) {
         }
 
     } catch (error) {
-        console.error('Network Error:', error);
+        console.error('❌ Network Error:', error);
         sendResponse({ status: 'error', message: error.message });
     }
 }

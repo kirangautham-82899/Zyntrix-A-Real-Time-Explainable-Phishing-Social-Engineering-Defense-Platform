@@ -229,23 +229,45 @@ async def analyze_url(request: Request, url_request: URLAnalysisRequest):
             raise HTTPException(status_code=400, detail=result.get('error', 'Invalid URL'))
         
         # Format response
+        response_data = {
+            'url': result['url'],
+            'domain': result['domain'],
+            'risk_score': result['risk_score'],
+            'risk_level': result['risk_level'],
+            'classification': result['risk_level'].upper(),
+            'explanation': _generate_explanation(result),
+            'factors': result['factors'],
+            'recommendations': _generate_recommendations(result['risk_level']),
+            'analysis_details': {
+                'domain_analysis': result['domain_analysis'],
+                'pattern_analysis': result['pattern_analysis'],
+                'structure_analysis': result['structure_analysis']
+            }
+        }
+        
+        # Add to threat feed for live monitor
+        threat_entry = threat_feed.add_threat({
+            'type': 'url',
+            'url': result['url'],
+            'domain': result['domain'],
+            'risk_score': result['risk_score'],
+            'risk_level': result['risk_level']
+        })
+        
+        # Broadcast to WebSocket clients if high risk
+        if result['risk_score'] > 60:
+            await ws_manager.broadcast_threat_alert(threat_entry)
+        else:
+            # Send scan completion update
+            await ws_manager.broadcast({
+                'type': 'scan_complete',
+                'timestamp': datetime.utcnow().isoformat(),
+                'data': threat_entry
+            })
+        
         return URLAnalysisResponse(
             success=True,
-            data={
-                'url': result['url'],
-                'domain': result['domain'],
-                'risk_score': result['risk_score'],
-                'risk_level': result['risk_level'],
-                'classification': result['risk_level'].upper(),
-                'explanation': _generate_explanation(result),
-                'factors': result['factors'],
-                'recommendations': _generate_recommendations(result['risk_level']),
-                'analysis_details': {
-                    'domain_analysis': result['domain_analysis'],
-                    'pattern_analysis': result['pattern_analysis'],
-                    'structure_analysis': result['structure_analysis']
-                }
-            },
+            data=response_data,
             timestamp=datetime.utcnow().isoformat()
         )
     

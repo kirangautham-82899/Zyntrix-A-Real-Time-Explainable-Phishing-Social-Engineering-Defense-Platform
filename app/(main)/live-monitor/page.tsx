@@ -61,54 +61,75 @@ export default function LiveMonitorPage() {
     };
 
     const connectWebSocket = () => {
-        const ws = new WebSocket('ws://localhost:8000/api/ws/threats');
+        try {
+            const ws = new WebSocket('ws://localhost:8000/api/ws/threats');
 
-        ws.onopen = () => {
-            console.log('WebSocket connected');
-            setConnected(true);
-        };
+            ws.onopen = () => {
+                console.log('✅ WebSocket connected to threat feed');
+                setConnected(true);
+            };
 
-        ws.onmessage = (event) => {
-            const message = JSON.parse(event.data);
+            ws.onmessage = (event) => {
+                try {
+                    const message = JSON.parse(event.data);
 
-            switch (message.type) {
-                case 'connection_established':
-                    console.log('Connection established:', message.message);
-                    break;
+                    switch (message.type) {
+                        case 'connection_established':
+                            console.log('Connection established:', message.message);
+                            break;
 
-                case 'initial_feed':
-                    setThreats(message.data);
-                    break;
+                        case 'initial_feed':
+                            setThreats(message.data);
+                            break;
 
-                case 'threat_alert':
-                    // Add new threat to feed
-                    setThreats(prev => [message.data, ...prev].slice(0, 50));
-                    break;
+                        case 'threat_alert':
+                            // Add new threat to feed
+                            setThreats(prev => [message.data, ...prev].slice(0, 50));
+                            break;
 
-                case 'scan_complete':
-                    // Add scan result to feed
-                    setThreats(prev => [message.data, ...prev].slice(0, 50));
-                    break;
+                        case 'scan_complete':
+                            // Add scan result to feed
+                            setThreats(prev => [message.data, ...prev].slice(0, 50));
+                            break;
 
-                case 'stats_update':
-                    setStats(message.data);
-                    break;
-            }
-        };
+                        case 'stats_update':
+                            setStats(message.data);
+                            break;
 
-        ws.onclose = () => {
-            console.log('WebSocket disconnected');
+                        case 'heartbeat':
+                            // Heartbeat received, connection is alive
+                            break;
+
+                        default:
+                            console.log('Unknown message type:', message.type);
+                    }
+                } catch (err) {
+                    console.error('Failed to parse WebSocket message:', err);
+                }
+            };
+
+            ws.onclose = (event) => {
+                console.log('WebSocket disconnected. Code:', event.code, 'Reason:', event.reason || 'No reason provided');
+                setConnected(false);
+
+                // Attempt to reconnect after 5 seconds
+                console.log('Attempting to reconnect in 5 seconds...');
+                setTimeout(connectWebSocket, 5000);
+            };
+
+            ws.onerror = (error) => {
+                console.warn('⚠️ WebSocket connection issue (this is normal during initial connection)');
+                // Don't log the error object itself as it's usually empty
+                setConnected(false);
+            };
+
+            wsRef.current = ws;
+        } catch (err) {
+            console.error('Failed to create WebSocket connection:', err);
             setConnected(false);
-
-            // Attempt to reconnect after 5 seconds
+            // Retry after 5 seconds
             setTimeout(connectWebSocket, 5000);
-        };
-
-        ws.onerror = (error) => {
-            console.error('WebSocket error:', error);
-        };
-
-        wsRef.current = ws;
+        }
     };
 
     const getRiskColor = (level: string) => {

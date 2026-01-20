@@ -51,9 +51,17 @@ export default function DashboardPage() {
             stats: "Visual Feedback"
         },
         {
+            title: "Live Monitor",
+            description: "Real-time threat feed with WebSocket updates",
+            icon: <Activity className="w-8 h-8" />,
+            href: "/live-monitor",
+            color: "#8B5CF6",
+            stats: "Live Feed"
+        },
+        {
             title: "API Testing",
             description: "Backend connectivity and health monitoring",
-            icon: <Activity className="w-8 h-8" />,
+            icon: <Terminal className="w-8 h-8" />,
             href: "/api-test",
             color: "#3B82F6",
             stats: "System Check"

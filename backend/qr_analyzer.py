@@ -7,8 +7,16 @@ import io
 import re
 from PIL import Image
 from typing import Dict, Optional
-from pyzbar import pyzbar
 from url_analyzer import url_analyzer
+
+# Try to import pyzbar, but make it optional
+try:
+    from pyzbar import pyzbar
+    PYZBAR_AVAILABLE = True
+except ImportError:
+    PYZBAR_AVAILABLE = False
+    print("⚠️  Warning: pyzbar not available. QR code scanning will be disabled.")
+    print("   To enable QR scanning, install zbar: brew install zbar")
 
 class QRAnalyzer:
     """Analyzes QR code images and extracts URLs for threat detection"""
@@ -28,6 +36,14 @@ class QRAnalyzer:
         Returns:
             Comprehensive analysis results including extracted URL and threat assessment
         """
+        # Check if pyzbar is available
+        if not PYZBAR_AVAILABLE:
+            return {
+                'valid': False,
+                'error': 'QR code scanning is not available. Please install zbar library: brew install zbar',
+                'qr_detected': False
+            }
+        
         try:
             # Decode QR code from image
             decoded_data = self._decode_qr_image(image_bytes)

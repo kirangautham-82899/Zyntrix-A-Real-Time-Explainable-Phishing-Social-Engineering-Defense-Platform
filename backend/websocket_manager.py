@@ -121,8 +121,9 @@ class ThreatFeedManager:
     
     def add_threat(self, threat_data: dict):
         """Add threat to feed"""
+        import uuid
         threat_entry = {
-            "id": f"threat_{datetime.utcnow().timestamp()}",
+            "id": f"threat_{uuid.uuid4().hex[:12]}",
             "timestamp": datetime.utcnow().isoformat(),
             **threat_data
         }
