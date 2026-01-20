@@ -1,13 +1,17 @@
+[build]
 providers = ["python"]
 
-[phases.setup]
-nixPkgs = ["python311"]
+[build.nixPkgs]
+pkgs = ["python311", "zbar"]
 
-[phases.install]
-cmds = ["python -m venv .venv", ". .venv/bin/activate && pip install -r backend/requirements.txt"]
+[build.nixLibs]
+libs = ["zbar"]
 
-[phases.build]
-cmds = ["echo 'Build phase skipped - dependencies installed in install phase'"]
+[build.env]
+NIXPACKS_PYTHON_VERSION = "3.11"
+
+[install]
+cmds = ["pip install -r backend/requirements.txt"]
 
 [start]
-cmd = ". .venv/bin/activate && uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
+cmd = "cd backend && uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"
