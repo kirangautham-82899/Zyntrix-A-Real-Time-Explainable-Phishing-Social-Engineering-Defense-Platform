@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { History as HistoryIcon, Search, Filter, Trash2, Terminal, Shield, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
+import { History as HistoryIcon, Search, Trash2, Terminal, Shield, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
 
 interface ScanHistoryItem {
     id: string;
@@ -19,16 +19,16 @@ export default function HistoryPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState('all');
 
-    useEffect(() => {
-        loadHistory();
-    }, []);
-
     const loadHistory = () => {
         const stored = localStorage.getItem('zyntrix_scan_history');
         if (stored) {
             setHistory(JSON.parse(stored));
         }
     };
+
+    useEffect(() => {
+        loadHistory();
+    }, []);
 
     const clearHistory = () => {
         if (confirm('Are you sure you want to clear all scan history?')) {
@@ -45,9 +45,9 @@ export default function HistoryPage() {
 
     const getRiskColor = (level: string) => {
         switch (level) {
-            case 'safe': return '#00FF41';
-            case 'suspicious': return '#FFD700';
-            case 'dangerous': return '#FF0055';
+            case 'safe': return '#10B981';
+            case 'suspicious': return '#F59E0B';
+            case 'dangerous': return '#EF4444';
             default: return '#666';
         }
     };
@@ -62,13 +62,13 @@ export default function HistoryPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0A0E1A] text-white">
+        <div className="min-h-screen bg-[#0F172A] text-white">
             {/* Matrix Background */}
             <div className="fixed inset-0 pointer-events-none opacity-20">
                 <div className="absolute inset-0" style={{
                     backgroundImage: `
-                        linear-gradient(0deg, transparent 24%, rgba(0, 240, 255, 0.05) 25%, rgba(0, 240, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 240, 255, 0.05) 75%, rgba(0, 240, 255, 0.05) 76%, transparent 77%, transparent),
-                        linear-gradient(90deg, transparent 24%, rgba(0, 240, 255, 0.05) 25%, rgba(0, 240, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 240, 255, 0.05) 75%, rgba(0, 240, 255, 0.05) 76%, transparent 77%, transparent)
+                        linear-gradient(0deg, transparent 24%, rgba(59, 130, 246, 0.05) 25%, rgba(59, 130, 246, 0.05) 26%, transparent 27%, transparent 74%, rgba(59, 130, 246, 0.05) 75%, rgba(59, 130, 246, 0.05) 76%, transparent 77%, transparent),
+                        linear-gradient(90deg, transparent 24%, rgba(59, 130, 246, 0.05) 25%, rgba(59, 130, 246, 0.05) 26%, transparent 27%, transparent 74%, rgba(59, 130, 246, 0.05) 75%, rgba(59, 130, 246, 0.05) 76%, transparent 77%, transparent)
                     `,
                     backgroundSize: '50px 50px',
                 }} />
@@ -82,8 +82,8 @@ export default function HistoryPage() {
                     className="mb-12"
                 >
                     <div className="flex items-center gap-3 mb-2">
-                        <Terminal className="w-8 h-8 text-[#00F0FF]" />
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-[#00F0FF] to-[#B026FF] bg-clip-text text-transparent">
+                        <Terminal className="w-8 h-8 text-[#3B82F6]" />
+                        <h1 className="text-4xl font-bold bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] bg-clip-text text-transparent">
                             SCAN HISTORY
                         </h1>
                     </div>
@@ -99,7 +99,7 @@ export default function HistoryPage() {
                             placeholder="Search history..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-12 pr-4 py-3 bg-black/40 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:border-[#00F0FF] focus:outline-none transition-colors font-mono"
+                            className="w-full pl-12 pr-4 py-3 bg-black/40 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:border-[#3B82F6] focus:outline-none transition-colors font-mono"
                         />
                     </div>
                     <div className="flex gap-2">
@@ -108,8 +108,8 @@ export default function HistoryPage() {
                                 key={type}
                                 onClick={() => setFilterType(type)}
                                 className={`px-4 py-3 rounded-lg font-mono text-sm transition-all ${filterType === type
-                                        ? 'bg-[#00F0FF]/20 border border-[#00F0FF] text-[#00F0FF]'
-                                        : 'bg-white/5 border border-white/10 hover:border-white/20'
+                                    ? 'bg-[#3B82F6]/20 border border-[#3B82F6] text-[#3B82F6]'
+                                    : 'bg-white/5 border border-white/10 hover:border-white/20'
                                     }`}
                             >
                                 {type.toUpperCase()}
@@ -117,7 +117,7 @@ export default function HistoryPage() {
                         ))}
                         <button
                             onClick={clearHistory}
-                            className="px-4 py-3 bg-[#FF0055]/20 border border-[#FF0055] rounded-lg hover:bg-[#FF0055]/30 transition-colors flex items-center gap-2"
+                            className="px-4 py-3 bg-[#EF4444]/20 border border-[#EF4444] rounded-lg hover:bg-[#EF4444]/30 transition-colors flex items-center gap-2"
                         >
                             <Trash2 className="w-4 h-4" />
                             CLEAR

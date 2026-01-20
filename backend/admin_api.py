@@ -6,13 +6,13 @@ Enterprise admin features including user management, analytics, and threat intel
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from typing import Optional, List
 from datetime import datetime, timedelta
-from backend.auth import (
+from auth import (
     get_current_user, require_admin, require_admin_or_user,
     TokenData, UserCreate, UserResponse, get_password_hash
 )
-from backend.models import User, Organization, Policy, AuditLog
-from backend.database import database
-from backend.analytics_engine import get_analytics_engine
+from models import User, Organization, Policy, AuditLog
+from database import database
+from analytics_engine import get_analytics_engine
 from bson import ObjectId
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -403,7 +403,7 @@ async def submit_threat_report(
     current_user: TokenData = Depends(require_admin_or_user)
 ):
     """Submit a new threat to intelligence database"""
-    from backend.models import ThreatIntelligence
+    from models import ThreatIntelligence
     
     threat = ThreatIntelligence(
         threat_type=threat_data['threat_type'],

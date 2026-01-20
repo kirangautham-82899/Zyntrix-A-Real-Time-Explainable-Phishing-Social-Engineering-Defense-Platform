@@ -19,6 +19,12 @@ interface AnalyticsData {
     timeline: Array<{ date: string; scans: number; threats: number }>;
 }
 
+interface ScanHistoryItem {
+    riskLevel: string;
+    type: string;
+    timestamp: string;
+}
+
 export default function AnalyticsPage() {
     const [analytics, setAnalytics] = useState<AnalyticsData>({
         totalScans: 0,
@@ -29,10 +35,6 @@ export default function AnalyticsPage() {
         timeline: []
     });
 
-    useEffect(() => {
-        loadAnalytics();
-    }, []);
-
     const loadAnalytics = () => {
         const history = localStorage.getItem('zyntrix_scan_history');
         if (!history) return;
@@ -41,13 +43,13 @@ export default function AnalyticsPage() {
 
         const stats: AnalyticsData = {
             totalScans: scans.length,
-            safeCount: scans.filter((s: any) => s.riskLevel === 'safe').length,
-            suspiciousCount: scans.filter((s: any) => s.riskLevel === 'suspicious').length,
-            dangerousCount: scans.filter((s: any) => s.riskLevel === 'dangerous').length,
+            safeCount: scans.filter((s: ScanHistoryItem) => s.riskLevel === 'safe').length,
+            suspiciousCount: scans.filter((s: ScanHistoryItem) => s.riskLevel === 'suspicious').length,
+            dangerousCount: scans.filter((s: ScanHistoryItem) => s.riskLevel === 'dangerous').length,
             byType: {
-                url: scans.filter((s: any) => s.type === 'url').length,
-                email: scans.filter((s: any) => s.type === 'email').length,
-                sms: scans.filter((s: any) => s.type === 'sms').length,
+                url: scans.filter((s: ScanHistoryItem) => s.type === 'url').length,
+                email: scans.filter((s: ScanHistoryItem) => s.type === 'email').length,
+                sms: scans.filter((s: ScanHistoryItem) => s.type === 'sms').length,
             },
             timeline: generateTimeline(scans)
         };
@@ -55,7 +57,11 @@ export default function AnalyticsPage() {
         setAnalytics(stats);
     };
 
-    const generateTimeline = (scans: any[]) => {
+    useEffect(() => {
+        loadAnalytics();
+    }, []);
+
+    const generateTimeline = (scans: ScanHistoryItem[]) => {
         const last7Days = Array.from({ length: 7 }, (_, i) => {
             const date = new Date();
             date.setDate(date.getDate() - (6 - i));
@@ -63,8 +69,8 @@ export default function AnalyticsPage() {
         });
 
         return last7Days.map(date => {
-            const dayScans = scans.filter((s: any) => s.timestamp.startsWith(date));
-            const threats = dayScans.filter((s: any) => s.riskLevel === 'suspicious' || s.riskLevel === 'dangerous');
+            const dayScans = scans.filter((s: ScanHistoryItem) => s.timestamp.startsWith(date));
+            const threats = dayScans.filter((s: ScanHistoryItem) => s.riskLevel === 'suspicious' || s.riskLevel === 'dangerous');
 
             return {
                 date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -75,9 +81,9 @@ export default function AnalyticsPage() {
     };
 
     const riskDistribution = [
-        { name: 'Safe', value: analytics.safeCount, color: '#00FF41' },
-        { name: 'Suspicious', value: analytics.suspiciousCount, color: '#FFD700' },
-        { name: 'Dangerous', value: analytics.dangerousCount, color: '#FF0055' }
+        { name: 'Safe', value: analytics.safeCount, color: '#10B981' },
+        { name: 'Suspicious', value: analytics.suspiciousCount, color: '#F59E0B' },
+        { name: 'Dangerous', value: analytics.dangerousCount, color: '#EF4444' }
     ];
 
     const typeDistribution = [
@@ -91,13 +97,13 @@ export default function AnalyticsPage() {
         : '0.0';
 
     return (
-        <div className="min-h-screen bg-[#0A0E1A] text-white">
+        <div className="min-h-screen bg-[#0F172A] text-white">
             {/* Matrix Background */}
             <div className="fixed inset-0 pointer-events-none opacity-20">
                 <div className="absolute inset-0" style={{
                     backgroundImage: `
-                        linear-gradient(0deg, transparent 24%, rgba(0, 240, 255, 0.05) 25%, rgba(0, 240, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 240, 255, 0.05) 75%, rgba(0, 240, 255, 0.05) 76%, transparent 77%, transparent),
-                        linear-gradient(90deg, transparent 24%, rgba(0, 240, 255, 0.05) 25%, rgba(0, 240, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 240, 255, 0.05) 75%, rgba(0, 240, 255, 0.05) 76%, transparent 77%, transparent)
+                        linear-gradient(0deg, transparent 24%, rgba(59, 130, 246, 0.05) 25%, rgba(59, 130, 246, 0.05) 26%, transparent 27%, transparent 74%, rgba(59, 130, 246, 0.05) 75%, rgba(59, 130, 246, 0.05) 76%, transparent 77%, transparent),
+                        linear-gradient(90deg, transparent 24%, rgba(59, 130, 246, 0.05) 25%, rgba(59, 130, 246, 0.05) 26%, transparent 27%, transparent 74%, rgba(59, 130, 246, 0.05) 75%, rgba(59, 130, 246, 0.05) 76%, transparent 77%, transparent)
                     `,
                     backgroundSize: '50px 50px',
                 }} />
@@ -112,8 +118,8 @@ export default function AnalyticsPage() {
                 >
                     <div>
                         <div className="flex items-center gap-3 mb-2">
-                            <Terminal className="w-8 h-8 text-[#00F0FF]" />
-                            <h1 className="text-4xl font-bold bg-gradient-to-r from-[#00F0FF] to-[#B026FF] bg-clip-text text-transparent">
+                            <Terminal className="w-8 h-8 text-[#3B82F6]" />
+                            <h1 className="text-4xl font-bold bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] bg-clip-text text-transparent">
                                 ANALYTICS
                             </h1>
                         </div>
@@ -131,10 +137,10 @@ export default function AnalyticsPage() {
                 {/* KPI Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     {[
-                        { icon: Shield, label: 'Total Scans', value: analytics.totalScans.toLocaleString(), color: '#00F0FF' },
-                        { icon: Activity, label: 'Threats Detected', value: (analytics.suspiciousCount + analytics.dangerousCount).toLocaleString(), color: '#FF0055', badge: `${threatRate}%` },
-                        { icon: Shield, label: 'Safe Content', value: analytics.safeCount.toLocaleString(), color: '#00FF41', badge: `${analytics.totalScans > 0 ? (analytics.safeCount / analytics.totalScans * 100).toFixed(0) : 0}%` },
-                        { icon: Calendar, label: 'Last 7 Days', value: analytics.timeline.reduce((sum, day) => sum + day.scans, 0).toString(), color: '#B026FF' },
+                        { icon: Shield, label: 'Total Scans', value: analytics.totalScans.toLocaleString(), color: '#3B82F6' },
+                        { icon: Activity, label: 'Threats Detected', value: (analytics.suspiciousCount + analytics.dangerousCount).toLocaleString(), color: '#EF4444', badge: `${threatRate}%` },
+                        { icon: Shield, label: 'Safe Content', value: analytics.safeCount.toLocaleString(), color: '#10B981', badge: `${analytics.totalScans > 0 ? (analytics.safeCount / analytics.totalScans * 100).toFixed(0) : 0}%` },
+                        { icon: Calendar, label: 'Last 7 Days', value: analytics.timeline.reduce((sum, day) => sum + day.scans, 0).toString(), color: '#06B6D4' },
                     ].map((stat, i) => (
                         <motion.div
                             key={i}
@@ -159,7 +165,7 @@ export default function AnalyticsPage() {
                     {/* Timeline Chart */}
                     <div className="p-6 rounded-xl bg-black/40 backdrop-blur-xl border border-white/10">
                         <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                            <TrendingUp className="w-5 h-5 text-[#00F0FF]" />
+                            <TrendingUp className="w-5 h-5 text-[#3B82F6]" />
                             Scan Activity (7 Days)
                         </h3>
                         <ResponsiveContainer width="100%" height={300}>
@@ -169,8 +175,8 @@ export default function AnalyticsPage() {
                                 <YAxis stroke="#9ca3af" style={{ fontSize: '12px' }} />
                                 <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px' }} />
                                 <Legend />
-                                <Line type="monotone" dataKey="scans" stroke="#00F0FF" strokeWidth={2} name="Total Scans" />
-                                <Line type="monotone" dataKey="threats" stroke="#FF0055" strokeWidth={2} name="Threats" />
+                                <Line type="monotone" dataKey="scans" stroke="#3B82F6" strokeWidth={2} name="Total Scans" />
+                                <Line type="monotone" dataKey="threats" stroke="#EF4444" strokeWidth={2} name="Threats" />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
@@ -178,7 +184,7 @@ export default function AnalyticsPage() {
                     {/* Risk Distribution */}
                     <div className="p-6 rounded-xl bg-black/40 backdrop-blur-xl border border-white/10">
                         <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                            <Shield className="w-5 h-5 text-[#B026FF]" />
+                            <Shield className="w-5 h-5 text-[#06B6D4]" />
                             Risk Distribution
                         </h3>
                         <ResponsiveContainer width="100%" height={300}>
@@ -207,7 +213,7 @@ export default function AnalyticsPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="p-6 rounded-xl bg-black/40 backdrop-blur-xl border border-white/10">
                         <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                            <Activity className="w-5 h-5 text-[#00F0FF]" />
+                            <Activity className="w-5 h-5 text-[#3B82F6]" />
                             Scan Types
                         </h3>
                         <ResponsiveContainer width="100%" height={300}>
@@ -216,7 +222,7 @@ export default function AnalyticsPage() {
                                 <XAxis dataKey="name" stroke="#9ca3af" style={{ fontSize: '12px' }} />
                                 <YAxis stroke="#9ca3af" style={{ fontSize: '12px' }} />
                                 <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px' }} />
-                                <Bar dataKey="count" fill="#00F0FF" radius={[8, 8, 0, 0]} />
+                                <Bar dataKey="count" fill="#3B82F6" radius={[8, 8, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -228,28 +234,28 @@ export default function AnalyticsPage() {
                             <div className="p-4 rounded-lg bg-white/5 border border-white/10">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-gray-300 font-mono text-sm">Threat Detection Rate</span>
-                                    <span className="text-2xl font-bold text-[#FF0055]">{threatRate}%</span>
+                                    <span className="text-2xl font-bold text-[#EF4444]">{threatRate}%</span>
                                 </div>
                                 <div className="h-2 bg-black/40 rounded-full overflow-hidden">
-                                    <div className="h-full bg-gradient-to-r from-[#FF0055] to-[#FFD700]" style={{ width: `${threatRate}%` }} />
+                                    <div className="h-full bg-gradient-to-r from-[#EF4444] to-[#F59E0B]" style={{ width: `${threatRate}%` }} />
                                 </div>
                             </div>
 
                             <div className="p-4 rounded-lg bg-white/5 border border-white/10">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-gray-300 font-mono text-sm">Safe Content Rate</span>
-                                    <span className="text-2xl font-bold text-[#00FF41]">
+                                    <span className="text-2xl font-bold text-[#10B981]">
                                         {analytics.totalScans > 0 ? (analytics.safeCount / analytics.totalScans * 100).toFixed(1) : 0}%
                                     </span>
                                 </div>
                                 <div className="h-2 bg-black/40 rounded-full overflow-hidden">
-                                    <div className="h-full bg-[#00FF41]" style={{ width: `${analytics.totalScans > 0 ? (analytics.safeCount / analytics.totalScans * 100) : 0}%` }} />
+                                    <div className="h-full bg-[#10B981]" style={{ width: `${analytics.totalScans > 0 ? (analytics.safeCount / analytics.totalScans * 100) : 0}%` }} />
                                 </div>
                             </div>
 
                             <div className="p-4 rounded-lg bg-white/5 border border-white/10">
                                 <div className="text-gray-300 mb-2 font-mono text-sm">Most Scanned Type</div>
-                                <div className="text-2xl font-bold text-[#00F0FF]">
+                                <div className="text-2xl font-bold text-[#3B82F6]">
                                     {analytics.byType.url >= analytics.byType.email && analytics.byType.url >= analytics.byType.sms ? 'URL' :
                                         analytics.byType.email >= analytics.byType.sms ? 'Email' : 'SMS'}
                                 </div>
@@ -257,7 +263,7 @@ export default function AnalyticsPage() {
 
                             <div className="p-4 rounded-lg bg-white/5 border border-white/10">
                                 <div className="text-gray-300 mb-2 font-mono text-sm">Average Daily Scans</div>
-                                <div className="text-2xl font-bold text-[#B026FF]">
+                                <div className="text-2xl font-bold text-[#06B6D4]">
                                     {(analytics.timeline.reduce((sum, day) => sum + day.scans, 0) / 7).toFixed(1)}
                                 </div>
                             </div>

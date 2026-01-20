@@ -28,7 +28,6 @@ const sidebarItems = [
     { href: "/qr-scanner", label: "QR Scanner", icon: QrCode },
     { href: "/visualization", label: "Risk Viz", icon: Eye },
     { href: "/api-test", label: "API Status", icon: Activity },
-    { href: "/demo", label: "UI Demo", icon: Settings },
 ];
 
 export default function AppLayout({
@@ -40,9 +39,9 @@ export default function AppLayout({
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     return (
-        <div className="flex h-screen bg-[#0a0e27] text-white overflow-hidden">
+        <div className="flex h-screen bg-[#0F172A] text-white overflow-hidden">
             {/* Sidebar - Desktop */}
-            <aside className="hidden md:flex flex-col w-64 border-r border-cyan-500/20 bg-[#0a0e27]/95 backdrop-blur-xl">
+            <aside className="hidden md:flex flex-col w-64 border-r border-cyan-500/20 bg-[#0F172A]/95 backdrop-blur-xl">
                 <div className="p-6 flex items-center gap-3 border-b border-cyan-500/20">
                     <Shield className="w-8 h-8 text-cyan-400" />
                     <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
@@ -59,8 +58,8 @@ export default function AppLayout({
                             <Link key={item.href} href={item.href}>
                                 <div
                                     className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
-                                            ? "bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 border border-cyan-500/30"
-                                            : "text-gray-400 hover:text-cyan-300 hover:bg-white/5"
+                                        ? "bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 border border-cyan-500/30"
+                                        : "text-gray-400 hover:text-cyan-300 hover:bg-white/5"
                                         }`}
                                 >
                                     <Icon className={`w-5 h-5 ${isActive ? "text-cyan-400" : "text-gray-500 group-hover:text-cyan-400"}`} />
@@ -88,7 +87,7 @@ export default function AppLayout({
             </aside>
 
             {/* Mobile Header */}
-            <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#0a0e27]/90 backdrop-blur-md border-b border-cyan-500/20 z-50 flex items-center justify-between px-4">
+            <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#0F172A]/90 backdrop-blur-md border-b border-cyan-500/20 z-50 flex items-center justify-between px-4">
                 <div className="flex items-center gap-2">
                     <Shield className="w-6 h-6 text-cyan-400" />
                     <span className="font-bold text-lg bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
@@ -106,7 +105,7 @@ export default function AppLayout({
             {/* Main Content */}
             <main className="flex-1 flex flex-col overflow-hidden relative md:static pt-16 md:pt-0">
                 {/* Top Bar (Desktop) */}
-                <header className="hidden md:flex items-center justify-between px-8 py-4 bg-[#0a0e27]/50 backdrop-blur-sm border-b border-cyan-500/10">
+                <header className="hidden md:flex items-center justify-between px-8 py-4 bg-[#0F172A]/50 backdrop-blur-sm border-b border-cyan-500/10">
                     <div>
                         <h2 className="text-gray-400 text-sm">
                             / {sidebarItems.find(i => i.href === pathname)?.label || 'App'}
@@ -157,7 +156,7 @@ export default function AppLayout({
                             animate={{ x: 0 }}
                             exit={{ x: "-100%" }}
                             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                            className="absolute left-0 top-0 bottom-0 w-64 bg-[#0a0e27] border-r border-cyan-500/20"
+                            className="absolute left-0 top-0 bottom-0 w-64 bg-[#0F172A] border-r border-cyan-500/20"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="p-6 flex items-center gap-3 border-b border-cyan-500/20">
@@ -177,8 +176,8 @@ export default function AppLayout({
                                             onClick={() => setIsMobileMenuOpen(false)}
                                         >
                                             <div className={`flex items-center gap-3 px-4 py-3 rounded-xl mb-2 transition-all ${isActive
-                                                    ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
-                                                    : "text-gray-400"
+                                                ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
+                                                : "text-gray-400"
                                                 }`}>
                                                 <Icon className="w-5 h-5" />
                                                 <span className="font-medium">{item.label}</span>

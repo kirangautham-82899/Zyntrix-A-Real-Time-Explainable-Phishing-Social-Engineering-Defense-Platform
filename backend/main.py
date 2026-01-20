@@ -1,28 +1,31 @@
-from fastapi import FastAPI, HTTPException, Request, Depends, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Request, Depends, BackgroundTasks, File, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
-from backend.url_analyzer import url_analyzer
-from backend.email_analyzer import email_analyzer
-from backend.sms_analyzer import sms_analyzer
-from backend.ml_models import ml_classifier
-from backend.database import database
-from backend.cache import cache
-from backend.validation import validator
+from url_analyzer import url_analyzer
+from email_analyzer import email_analyzer
+from sms_analyzer import sms_analyzer
+from qr_analyzer import qr_analyzer
+from ml_models import ml_classifier
+from database import database
+from cache import cache
+from validation import validator
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-from backend.auth import (
+from auth import (
     get_current_user, create_access_token, create_refresh_token,
     verify_password, get_password_hash, decode_token,
     UserCreate, UserLogin, Token, TokenData
 )
-from backend.models import User
-from backend.admin_api import router as admin_router
+from models import User
+from admin_api import router as admin_router
 from bson import ObjectId
-from backend.behavioral_analyzer import behavioral_analyzer
+from behavioral_analyzer import behavioral_analyzer
+from websocket_manager import manager as ws_manager, threat_feed
+from blocking_policy import blocking_policy
 
 # Load environment variables
 load_dotenv()
@@ -122,7 +125,8 @@ async def root():
             "analysis": {
                 "url": "/api/analyze/url",
                 "email": "/api/analyze/email",
-                "sms": "/api/analyze/sms"
+                "sms": "/api/analyze/sms",
+                "qr": "/api/analyze/qr"
             },
             "admin": "/api/admin/*"
         }
@@ -406,6 +410,7 @@ async def analyze_sms(request: Request, sms_request: SMSAnalysisRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
+
 def _generate_sms_explanation(result: dict) -> str:
     """Generate human-readable explanation for SMS"""
     risk_level = result['risk_level']
@@ -419,6 +424,90 @@ def _generate_sms_explanation(result: dict) -> str:
         return f"This SMS shows suspicious characteristics with a risk score of {score}/100. Found {keyword_count} suspicious keywords and {scam_patterns} scam pattern(s). Exercise caution before responding or clicking links."
     else:
         return f"This SMS is highly suspicious with a risk score of {score}/100. Multiple red flags including {keyword_count} suspicious keywords and {scam_patterns} scam pattern(s) indicate potential scam or social engineering attack."
+
+# QR Code Analysis endpoint
+@app.post("/api/analyze/qr")
+@limiter.limit("10/minute")
+async def analyze_qr(request: Request, file: UploadFile = File(...)):
+    """
+    Analyze QR code image for embedded URLs and threats
+    Rate Limited: 10 requests per minute per IP
+    """
+    try:
+        # Validate file type
+        if not file.content_type or not file.content_type.startswith('image/'):
+            raise HTTPException(status_code=400, detail="File must be an image")
+        
+        # Read file bytes
+        image_bytes = await file.read()
+        
+        # Validate image
+        is_valid, error_msg = qr_analyzer.validate_image(image_bytes)
+        if not is_valid:
+            raise HTTPException(status_code=400, detail=error_msg)
+        
+        # Analyze QR code
+        result = qr_analyzer.analyze(image_bytes)
+        
+        if not result['valid']:
+            raise HTTPException(status_code=400, detail=result.get('error', 'QR code analysis failed'))
+        
+        # If no URL found in QR code
+        if not result.get('url_found'):
+            return {
+                "success": True,
+                "data": {
+                    'qr_detected': result['qr_detected'],
+                    'qr_data': result['qr_data'],
+                    'url_found': False,
+                    'message': result.get('message', 'QR code contains no URL'),
+                    'risk_score': 0,
+                    'risk_level': 'safe',
+                    'classification': 'SAFE'
+                },
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        
+        # Format response with URL analysis
+        return {
+            "success": True,
+            "data": {
+                'qr_detected': result['qr_detected'],
+                'qr_data': result['qr_data'],
+                'url_found': True,
+                'extracted_url': result['extracted_url'],
+                'url': result['url'],
+                'domain': result['domain'],
+                'risk_score': result['risk_score'],
+                'risk_level': result['risk_level'],
+                'classification': result['classification'],
+                'explanation': _generate_qr_explanation(result),
+                'factors': result['factors'],
+                'recommendations': _generate_recommendations(result['risk_level']),
+                'analysis_details': result['analysis_details']
+            },
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"QR analysis failed: {str(e)}")
+
+
+def _generate_qr_explanation(result: dict) -> str:
+    """Generate human-readable explanation for QR code"""
+    risk_level = result['risk_level']
+    score = result['risk_score']
+    url = result.get('extracted_url', 'unknown')
+    
+    if risk_level == 'safe':
+        return f"This QR code contains a URL ({url}) that appears safe with a low risk score of {score}/100. No significant malicious patterns were detected."
+    elif risk_level == 'suspicious':
+        return f"This QR code contains a suspicious URL ({url}) with a risk score of {score}/100. Exercise caution before visiting this link."
+    else:
+        return f"This QR code contains a dangerous URL ({url}) with a risk score of {score}/100. Multiple red flags indicate potential phishing or malicious intent. DO NOT scan or visit this link."
+
 
 # ============================================================================
 # AUTHENTICATION ENDPOINTS
@@ -599,6 +688,118 @@ async def get_current_user_info(current_user: TokenData = Depends(get_current_us
         "success": True,
         "data": user
     }
+
+# ============================================================================
+# WEBSOCKET ENDPOINTS - REAL-TIME MONITORING
+# ============================================================================
+
+@app.websocket("/api/ws/threats")
+async def websocket_threats(websocket: WebSocket):
+    """
+    WebSocket endpoint for real-time threat monitoring
+    Broadcasts threat alerts and scan updates to connected clients
+    """
+    await ws_manager.connect(websocket)
+    
+    try:
+        # Send initial connection success message
+        await ws_manager.send_personal_message({
+            "type": "connection_established",
+            "message": "Connected to threat feed",
+            "timestamp": datetime.utcnow().isoformat()
+        }, websocket)
+        
+        # Send recent threats
+        recent_threats = threat_feed.get_recent_threats(limit=10)
+        await ws_manager.send_personal_message({
+            "type": "initial_feed",
+            "data": recent_threats,
+            "timestamp": datetime.utcnow().isoformat()
+        }, websocket)
+        
+        # Keep connection alive and listen for messages
+        while True:
+            try:
+                data = await websocket.receive_text()
+                # Echo back for heartbeat
+                await ws_manager.send_personal_message({
+                    "type": "heartbeat",
+                    "timestamp": datetime.utcnow().isoformat()
+                }, websocket)
+            except WebSocketDisconnect:
+                break
+    
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+    finally:
+        ws_manager.disconnect(websocket)
+
+@app.get("/api/threats/feed")
+async def get_threat_feed(limit: int = 50):
+    """Get recent threats from the live feed"""
+    threats = threat_feed.get_recent_threats(limit=limit)
+    stats = threat_feed.get_threat_stats()
+    
+    return {
+        "success": True,
+        "data": {
+            "threats": threats,
+            "stats": stats,
+            "connections": ws_manager.get_connection_count()
+        },
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+# ============================================================================
+# BLOCKING POLICY ENDPOINTS
+# ============================================================================
+
+@app.post("/api/policy/check")
+async def check_blocking_policy(analysis_result: dict):
+    """
+    Check if content should be blocked based on policy
+    
+    Request body should contain analysis result from any analyzer
+    """
+    action = blocking_policy.get_blocking_action(analysis_result)
+    
+    return {
+        "success": True,
+        "data": action,
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+@app.post("/api/policy/override")
+async def log_policy_override(
+    user_id: str,
+    content: str,
+    risk_score: int,
+    reason: str = None
+):
+    """Log when user overrides a blocking decision"""
+    override_log = await blocking_policy.log_override(user_id, content, risk_score, reason)
+    
+    return {
+        "success": True,
+        "message": "Override logged successfully",
+        "data": override_log,
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+@app.get("/api/policy/list")
+async def list_policies():
+    """List all available blocking policies"""
+    policies = blocking_policy.list_policies()
+    
+    return {
+        "success": True,
+        "data": {
+            "policies": policies,
+            "default_policy": blocking_policy.get_policy("default")
+        },
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
 
 if __name__ == "__main__":
     import uvicorn

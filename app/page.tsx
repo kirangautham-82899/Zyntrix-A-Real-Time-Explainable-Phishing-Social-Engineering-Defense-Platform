@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
 import { Shield, Zap, Eye, Lock, TrendingUp, Terminal, Activity, Globe, Database, AlertTriangle, CheckCircle, XCircle, Cpu, Network, Code } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import ThreatMonitor from './components/ThreatMonitor';
+import HowItWorks from './components/HowItWorks';
 
 export default function LandingPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -33,10 +35,10 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0A0E1A] text-white overflow-hidden relative">
+    <div className="min-h-screen bg-[#0F172A] text-white overflow-hidden relative">
       {/* Progress Bar */}
       <motion.div
-        className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00F0FF] via-[#B026FF] to-[#FF0055] origin-left z-50"
+        className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#3B82F6] via-[#06B6D4] to-[#EF4444] origin-left z-50"
         style={{ scaleX }}
       />
 
@@ -44,8 +46,8 @@ export default function LandingPage() {
       <div className="fixed inset-0 pointer-events-none opacity-20">
         <div className="absolute inset-0" style={{
           backgroundImage: `
-            linear-gradient(0deg, transparent 24%, rgba(0, 240, 255, 0.05) 25%, rgba(0, 240, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 240, 255, 0.05) 75%, rgba(0, 240, 255, 0.05) 76%, transparent 77%, transparent),
-            linear-gradient(90deg, transparent 24%, rgba(0, 240, 255, 0.05) 25%, rgba(0, 240, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 240, 255, 0.05) 75%, rgba(0, 240, 255, 0.05) 76%, transparent 77%, transparent)
+            linear-gradient(0deg, transparent 24%, rgba(59, 130, 246, 0.05) 25%, rgba(59, 130, 246, 0.05) 26%, transparent 27%, transparent 74%, rgba(59, 130, 246, 0.05) 75%, rgba(59, 130, 246, 0.05) 76%, transparent 77%, transparent),
+            linear-gradient(90deg, transparent 24%, rgba(59, 130, 246, 0.05) 25%, rgba(59, 130, 246, 0.05) 26%, transparent 27%, transparent 74%, rgba(59, 130, 246, 0.05) 75%, rgba(59, 130, 246, 0.05) 76%, transparent 77%, transparent)
           `,
           backgroundSize: '50px 50px',
         }} />
@@ -59,7 +61,7 @@ export default function LandingPage() {
               key={i}
               className="absolute w-1 h-1 rounded-full"
               style={{
-                background: i % 3 === 0 ? '#00F0FF' : i % 3 === 1 ? '#B026FF' : '#00FF41',
+                background: i % 3 === 0 ? '#3B82F6' : i % 3 === 1 ? '#06B6D4' : '#10B981',
                 boxShadow: `0 0 10px currentColor`,
               }}
               initial={{
@@ -81,18 +83,7 @@ export default function LandingPage() {
         </div>
       )}
 
-      {/* Mouse Glow */}
-      <motion.div
-        className="fixed w-[600px] h-[600px] rounded-full pointer-events-none z-10"
-        style={{
-          background: 'radial-gradient(circle, rgba(0,240,255,0.15) 0%, transparent 70%)',
-        }}
-        animate={{
-          x: mousePosition.x - 300,
-          y: mousePosition.y - 300,
-        }}
-        transition={{ type: "spring", damping: 30, stiffness: 200 }}
-      />
+
 
       <Navbar />
 
@@ -107,20 +98,20 @@ export default function LandingPage() {
               transition={{ duration: 0.8 }}
             >
               {/* Terminal Header */}
-              <div className="mb-8 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#00F0FF]/10 border border-[#00F0FF]/30 backdrop-blur-sm">
-                <Terminal className="w-4 h-4 text-[#00F0FF]" />
-                <span className="text-sm font-mono text-[#00F0FF]">SYSTEM ACTIVE</span>
+              <div className="mb-8 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#3B82F6]/10 border border-[#3B82F6]/30 backdrop-blur-sm">
+                <Terminal className="w-4 h-4 text-[#3B82F6]" />
+                <span className="text-sm font-mono text-[#3B82F6]">SYSTEM ACTIVE</span>
                 <div className="flex gap-1 ml-2">
-                  <div className="w-2 h-2 rounded-full bg-[#00FF41] animate-pulse" />
-                  <div className="w-2 h-2 rounded-full bg-[#FFD700]" />
-                  <div className="w-2 h-2 rounded-full bg-[#FF0055]" />
+                  <div className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+                  <div className="w-2 h-2 rounded-full bg-[#F59E0B]" />
+                  <div className="w-2 h-2 rounded-full bg-[#EF4444]" />
                 </div>
               </div>
 
               {/* Glitch Title */}
               <h1 className="text-6xl md:text-7xl font-bold mb-6 leading-tight">
                 <motion.span
-                  className="inline-block bg-gradient-to-r from-[#00F0FF] via-[#B026FF] to-[#FF0055] bg-clip-text text-transparent"
+                  className="inline-block bg-gradient-to-r from-[#3B82F6] via-[#06B6D4] to-[#EF4444] bg-clip-text text-transparent"
                   animate={{
                     textShadow: [
                       '0 0 20px rgba(0,240,255,0.5)',
@@ -138,9 +129,9 @@ export default function LandingPage() {
 
               <p className="text-xl text-gray-400 mb-8 leading-relaxed">
                 AI-powered threat detection system protecting against{' '}
-                <span className="text-[#00F0FF] font-semibold">phishing</span>,{' '}
-                <span className="text-[#B026FF] font-semibold">malware</span>, and{' '}
-                <span className="text-[#FF0055] font-semibold">cyber attacks</span> in real-time.
+                <span className="text-[#3B82F6] font-semibold">phishing</span>,{' '}
+                <span className="text-[#06B6D4] font-semibold">malware</span>, and{' '}
+                <span className="text-[#EF4444] font-semibold">cyber attacks</span> in real-time.
               </p>
 
               {/* CTA Buttons */}
@@ -149,11 +140,11 @@ export default function LandingPage() {
                   <motion.button
                     whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(0,240,255,0.6)' }}
                     whileTap={{ scale: 0.95 }}
-                    className="group relative px-8 py-4 bg-gradient-to-r from-[#00F0FF] to-[#B026FF] rounded-lg font-bold text-black overflow-hidden"
+                    className="group relative px-8 py-4 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-lg font-bold text-black overflow-hidden"
                   >
                     <span className="relative z-10 flex items-center gap-2">
                       <Shield className="w-5 h-5" />
-                      INITIATE SCAN
+                      GET STARTED
                     </span>
                     <motion.div
                       className="absolute inset-0 bg-white"
@@ -168,10 +159,10 @@ export default function LandingPage() {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-8 py-4 border-2 border-[#00F0FF] rounded-lg font-bold text-[#00F0FF] hover:bg-[#00F0FF]/10 transition-all flex items-center gap-2"
+                    className="px-8 py-4 border-2 border-[#3B82F6] rounded-lg font-bold text-[#3B82F6] hover:bg-[#3B82F6]/10 transition-all flex items-center gap-2"
                   >
                     <Activity className="w-5 h-5" />
-                    LIVE THREATS
+                    VIEW LIVE MONITOR
                   </motion.button>
                 </Link>
               </div>
@@ -179,12 +170,12 @@ export default function LandingPage() {
               {/* Stats */}
               <div className="grid grid-cols-3 gap-4 mt-12">
                 {[
-                  { value: '99.9%', label: 'Detection Rate' },
-                  { value: '<5ms', label: 'Response' },
-                  { value: '24/7', label: 'Active' }
+                  { value: 'ML', label: 'Powered' },
+                  { value: 'Fast', label: 'Analysis' },
+                  { value: '24/7', label: 'Ready' }
                 ].map((stat, i) => (
                   <div key={i} className="text-center p-4 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm">
-                    <div className="text-2xl font-bold text-[#00F0FF]">{stat.value}</div>
+                    <div className="text-2xl font-bold text-[#3B82F6]">{stat.value}</div>
                     <div className="text-xs text-gray-500 mt-1">{stat.label}</div>
                   </div>
                 ))}
@@ -201,17 +192,17 @@ export default function LandingPage() {
               {/* Holographic Shield */}
               <div className="relative aspect-square max-w-md mx-auto">
                 <motion.div
-                  className="absolute inset-0 rounded-full border-2 border-[#00F0FF]/30"
+                  className="absolute inset-0 rounded-full border-2 border-[#3B82F6]/30"
                   animate={{ rotate: 360 }}
                   transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
                 />
                 <motion.div
-                  className="absolute inset-8 rounded-full border-2 border-[#B026FF]/30"
+                  className="absolute inset-8 rounded-full border-2 border-[#06B6D4]/30"
                   animate={{ rotate: -360 }}
                   transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
                 />
                 <motion.div
-                  className="absolute inset-16 rounded-full border-2 border-[#FF0055]/30"
+                  className="absolute inset-16 rounded-full border-2 border-[#EF4444]/30"
                   animate={{ rotate: 360 }}
                   transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
                 />
@@ -224,14 +215,14 @@ export default function LandingPage() {
                     }}
                     transition={{ duration: 5, repeat: Infinity }}
                   >
-                    <Shield className="w-32 h-32 text-[#00F0FF]" style={{ filter: 'drop-shadow(0 0 20px rgba(0,240,255,0.8))' }} />
+                    <Shield className="w-32 h-32 text-[#3B82F6]" style={{ filter: 'drop-shadow(0 0 20px rgba(0,240,255,0.8))' }} />
                   </motion.div>
                 </div>
 
                 {/* Threat Counter */}
-                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 px-6 py-3 bg-[#0A0E1A] border border-[#00FF41] rounded-lg backdrop-blur-sm">
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 px-6 py-3 bg-[#0F172A] border border-[#10B981] rounded-lg backdrop-blur-sm">
                   <div className="text-xs text-gray-400 mb-1">THREATS BLOCKED</div>
-                  <div className="text-2xl font-mono font-bold text-[#00FF41]">
+                  <div className="text-2xl font-mono font-bold text-[#10B981]">
                     {threatCount.toString().padStart(6, '0')}
                   </div>
                 </div>
@@ -240,6 +231,11 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Section Separator */}
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
+      </div>
 
       {/* Live Threat Monitor */}
       <section id="threat-monitor" className="py-32 px-6 relative">
@@ -251,7 +247,7 @@ export default function LandingPage() {
             className="text-center mb-16"
           >
             <h2 className="text-5xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-[#00F0FF] to-[#B026FF] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] bg-clip-text text-transparent">
                 LIVE THREAT MONITOR
               </span>
             </h2>
@@ -259,14 +255,14 @@ export default function LandingPage() {
           </motion.div>
 
           {/* Terminal-style threat log */}
-          <div className="bg-black/40 backdrop-blur-xl border border-[#00F0FF]/30 rounded-xl p-6 font-mono text-sm">
+          <div className="bg-black/40 backdrop-blur-xl border border-[#3B82F6]/30 rounded-xl p-6 font-mono text-sm">
             <div className="flex items-center gap-2 mb-4 pb-4 border-b border-white/10">
-              <Terminal className="w-4 h-4 text-[#00F0FF]" />
-              <span className="text-[#00F0FF]">threat_monitor.log</span>
+              <Terminal className="w-4 h-4 text-[#3B82F6]" />
+              <span className="text-[#3B82F6]">threat_monitor.log</span>
               <div className="ml-auto flex gap-1">
-                <div className="w-3 h-3 rounded-full bg-[#FF0055]" />
-                <div className="w-3 h-3 rounded-full bg-[#FFD700]" />
-                <div className="w-3 h-3 rounded-full bg-[#00FF41]" />
+                <div className="w-3 h-3 rounded-full bg-[#EF4444]" />
+                <div className="w-3 h-3 rounded-full bg-[#F59E0B]" />
+                <div className="w-3 h-3 rounded-full bg-[#10B981]" />
               </div>
             </div>
 
@@ -287,18 +283,18 @@ export default function LandingPage() {
                   className="flex items-center gap-4 text-xs"
                 >
                   <span className="text-gray-500">[{log.time}]</span>
-                  <span className={`px-2 py-1 rounded ${log.type === 'BLOCKED' ? 'bg-[#FF0055]/20 text-[#FF0055]' :
-                    log.type === 'SCANNED' ? 'bg-[#00FF41]/20 text-[#00FF41]' :
-                      'bg-[#FFD700]/20 text-[#FFD700]'
+                  <span className={`px-2 py-1 rounded ${log.type === 'BLOCKED' ? 'bg-[#EF4444]/20 text-[#EF4444]' :
+                    log.type === 'SCANNED' ? 'bg-[#10B981]/20 text-[#10B981]' :
+                      'bg-[#F59E0B]/20 text-[#F59E0B]'
                     }`}>
                     {log.type}
                   </span>
                   <span className="text-gray-300 flex-1">{log.threat}</span>
-                  <span className="text-[#00F0FF]">{log.ip}</span>
-                  <span className={`px-2 py-1 rounded text-xs ${log.severity === 'CRITICAL' ? 'bg-[#FF0055]/20 text-[#FF0055]' :
+                  <span className="text-[#3B82F6]">{log.ip}</span>
+                  <span className={`px-2 py-1 rounded text-xs ${log.severity === 'CRITICAL' ? 'bg-[#EF4444]/20 text-[#EF4444]' :
                     log.severity === 'HIGH' ? 'bg-[#FF6B00]/20 text-[#FF6B00]' :
-                      log.severity === 'MEDIUM' ? 'bg-[#FFD700]/20 text-[#FFD700]' :
-                        'bg-[#00FF41]/20 text-[#00FF41]'
+                      log.severity === 'MEDIUM' ? 'bg-[#F59E0B]/20 text-[#F59E0B]' :
+                        'bg-[#10B981]/20 text-[#10B981]'
                     }`}>
                     {log.severity}
                   </span>
@@ -308,6 +304,11 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Section Separator */}
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
+      </div>
 
       {/* Features - 3D Cards */}
       <section id="features" className="py-32 px-6 relative">
@@ -319,7 +320,7 @@ export default function LandingPage() {
             className="text-center mb-16"
           >
             <h2 className="text-5xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-[#00F0FF] to-[#B026FF] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] bg-clip-text text-transparent">
                 DEFENSE SYSTEMS
               </span>
             </h2>
@@ -330,45 +331,45 @@ export default function LandingPage() {
             {[
               {
                 icon: <Zap className="w-8 h-8" />,
-                title: 'Real-Time Scanning',
-                description: 'Instant threat detection with sub-5ms response time',
-                color: '#00F0FF',
-                gradient: 'from-[#00F0FF]/20 to-transparent'
+                title: 'URL/Email/SMS Scanning',
+                description: 'Analyze URLs, emails, and SMS messages for phishing and malware threats',
+                color: '#3B82F6',
+                gradient: 'from-[#3B82F6]/20 to-transparent'
               },
               {
                 icon: <Eye className="w-8 h-8" />,
                 title: 'Behavioral Analysis',
-                description: 'AI-powered pattern recognition for zero-day threats',
-                color: '#B026FF',
-                gradient: 'from-[#B026FF]/20 to-transparent'
-              },
-              {
-                icon: <Lock className="w-8 h-8" />,
-                title: 'End-to-End Encryption',
-                description: 'Military-grade security for all data transmissions',
-                color: '#FF0055',
-                gradient: 'from-[#FF0055]/20 to-transparent'
+                description: 'Isolation Forest ML model for detecting anomalous user patterns',
+                color: '#06B6D4',
+                gradient: 'from-[#06B6D4]/20 to-transparent'
               },
               {
                 icon: <Database className="w-8 h-8" />,
-                title: 'Threat Intelligence',
-                description: 'Global threat database updated in real-time',
-                color: '#00FF41',
-                gradient: 'from-[#00FF41]/20 to-transparent'
-              },
-              {
-                icon: <Network className="w-8 h-8" />,
-                title: 'Network Protection',
-                description: 'Comprehensive monitoring across all endpoints',
-                color: '#FFD700',
-                gradient: 'from-[#FFD700]/20 to-transparent'
+                title: 'Threat Database',
+                description: 'MongoDB-powered storage for scan history and threat intelligence',
+                color: '#10B981',
+                gradient: 'from-[#10B981]/20 to-transparent'
               },
               {
                 icon: <Cpu className="w-8 h-8" />,
-                title: 'ML-Powered Defense',
-                description: 'Self-learning algorithms that evolve with threats',
-                color: '#00F0FF',
-                gradient: 'from-[#00F0FF]/20 to-transparent'
+                title: 'ML Risk Scoring',
+                description: 'Scikit-learn models provide intelligent risk assessment',
+                color: '#3B82F6',
+                gradient: 'from-[#3B82F6]/20 to-transparent'
+              },
+              {
+                icon: <Activity className="w-8 h-8" />,
+                title: 'Real-Time Analysis',
+                description: 'FastAPI backend processes threats with instant feedback',
+                color: '#F59E0B',
+                gradient: 'from-[#F59E0B]/20 to-transparent'
+              },
+              {
+                icon: <TrendingUp className="w-8 h-8" />,
+                title: 'Analytics Dashboard',
+                description: 'Track scan history, view statistics, and monitor threat trends',
+                color: '#EF4444',
+                gradient: 'from-[#EF4444]/20 to-transparent'
               },
             ].map((feature, i) => (
               <motion.div
@@ -411,199 +412,18 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Section Separator */}
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
+      </div>
+
       {/* How It Works */}
-      <section id="how-it-works" className="py-32 px-6 relative">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-5xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-[#00F0FF] to-[#B026FF] bg-clip-text text-transparent">
-                HOW IT WORKS
-              </span>
-            </h2>
-            <p className="text-xl text-gray-400">Three-step cyber defense protocol</p>
-          </motion.div>
+      <HowItWorks />
 
-          <div className="grid md:grid-cols-3 gap-8 relative">
-            {/* Connection Line */}
-            <div className="hidden md:block absolute top-1/3 left-0 right-0 h-0.5 bg-gradient-to-r from-[#00F0FF]/50 via-[#B026FF]/50 to-[#FF0055]/50" />
-
-            {[
-              {
-                step: '01',
-                title: 'SCAN',
-                description: 'Input URL, email, SMS, or QR code into our AI-powered scanner',
-                icon: <Terminal className="w-12 h-12" />,
-                color: '#00F0FF'
-              },
-              {
-                step: '02',
-                title: 'ANALYZE',
-                description: 'Machine learning models process data in milliseconds using threat intelligence',
-                icon: <Cpu className="w-12 h-12" />,
-                color: '#B026FF'
-              },
-              {
-                step: '03',
-                title: 'PROTECT',
-                description: 'Receive instant risk assessment with actionable security recommendations',
-                icon: <Shield className="w-12 h-12" />,
-                color: '#00FF41'
-              }
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.2 }}
-                className="relative"
-              >
-                {/* Step Number Background */}
-                <div
-                  className="absolute -top-4 -left-4 text-8xl font-bold opacity-5"
-                  style={{ color: item.color }}
-                >
-                  {item.step}
-                </div>
-
-                {/* Card */}
-                <motion.div
-                  whileHover={{ y: -10, scale: 1.02 }}
-                  className="relative bg-black/40 backdrop-blur-xl border border-white/10 hover:border-white/30 rounded-2xl p-8 h-full transition-all"
-                >
-                  {/* Gradient Top Border */}
-                  <div
-                    className="absolute top-0 left-0 right-0 h-1 rounded-t-2xl"
-                    style={{ background: `linear-gradient(to right, ${item.color}, transparent)` }}
-                  />
-
-                  {/* Icon */}
-                  <motion.div
-                    className="mb-6 w-16 h-16 rounded-xl bg-white/5 flex items-center justify-center"
-                    style={{ color: item.color }}
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                  >
-                    {item.icon}
-                  </motion.div>
-
-                  {/* Step Badge */}
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-4">
-                    <span className="text-xs font-mono" style={{ color: item.color }}>
-                      STEP {item.step}
-                    </span>
-                  </div>
-
-                  <h3
-                    className="text-2xl font-bold mb-3"
-                    style={{ color: item.color }}
-                  >
-                    {item.title}
-                  </h3>
-
-                  <p className="text-gray-400 leading-relaxed">
-                    {item.description}
-                  </p>
-
-                  {/* Glow Effect */}
-                  <div
-                    className="absolute -inset-0.5 opacity-0 group-hover:opacity-100 blur-xl transition-opacity -z-10 rounded-2xl"
-                    style={{ background: `${item.color}20` }}
-                  />
-                </motion.div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive Demo Section */}
-
-      <section className="py-32 px-6 relative">
-        <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-5xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-[#00F0FF] to-[#B026FF] bg-clip-text text-transparent">
-                TRY IT NOW
-              </span>
-            </h2>
-            <p className="text-xl text-gray-400">Experience real-time threat detection</p>
-          </motion.div>
-
-          <div className="bg-black/60 backdrop-blur-xl border-2 border-[#00F0FF]/30 rounded-2xl p-8 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00F0FF] via-[#B026FF] to-[#FF0055]" />
-
-            <div className="flex items-center gap-2 mb-6">
-              <Code className="w-5 h-5 text-[#00F0FF]" />
-              <span className="font-mono text-sm text-[#00F0FF]">scanner_interface.exe</span>
-            </div>
-
-            <div className="space-y-4">
-              <input
-                type="text"
-                placeholder="Enter URL, email, or paste content to scan..."
-                className="w-full px-6 py-4 bg-black/40 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:border-[#00F0FF] focus:outline-none transition-colors font-mono"
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <Link href="/login">
-                  <motion.button
-                    whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(0,240,255,0.5)' }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full px-6 py-3 bg-gradient-to-r from-[#00F0FF] to-[#B026FF] rounded-lg font-bold text-black flex items-center justify-center gap-2"
-                  >
-                    <Shield className="w-5 h-5" />
-                    ANALYZE THREAT
-                  </motion.button>
-                </Link>
-
-                <button className="px-6 py-3 border border-white/20 rounded-lg font-bold text-white hover:bg-white/5 transition-colors">
-                  CLEAR
-                </button>
-              </div>
-            </div>
-
-            {/* Sample Results */}
-            <div className="mt-8 space-y-3">
-              <div className="p-4 bg-[#00FF41]/10 border-l-4 border-[#00FF41] rounded-lg">
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-[#00FF41] flex-shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-bold text-[#00FF41]">SAFE</span>
-                      <span className="px-2 py-0.5 bg-[#00FF41]/20 rounded text-xs text-[#00FF41]">Risk: 5/100</span>
-                    </div>
-                    <p className="text-sm text-gray-400">No malicious patterns detected</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 bg-[#FF0055]/10 border-l-4 border-[#FF0055] rounded-lg">
-                <div className="flex items-start gap-3">
-                  <XCircle className="w-5 h-5 text-[#FF0055] flex-shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-bold text-[#FF0055]">DANGEROUS</span>
-                      <span className="px-2 py-0.5 bg-[#FF0055]/20 rounded text-xs text-[#FF0055] animate-pulse">Risk: 95/100</span>
-                    </div>
-                    <p className="text-sm text-gray-400">Phishing attempt detected - Domain mismatch</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Section Separator */}
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent" />
+      </div>
 
       {/* CTA Section */}
       <section className="py-32 px-6 relative">
@@ -615,7 +435,7 @@ export default function LandingPage() {
           >
             <h2 className="text-6xl font-bold mb-6">
               <motion.span
-                className="bg-gradient-to-r from-[#00F0FF] via-[#B026FF] to-[#FF0055] bg-clip-text text-transparent"
+                className="bg-gradient-to-r from-[#3B82F6] via-[#06B6D4] to-[#EF4444] bg-clip-text text-transparent"
                 animate={{
                   backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
                 }}
@@ -633,11 +453,11 @@ export default function LandingPage() {
               <motion.button
                 whileHover={{ scale: 1.05, boxShadow: '0 0 40px rgba(0,240,255,0.6)' }}
                 whileTap={{ scale: 0.95 }}
-                className="group relative px-12 py-6 bg-gradient-to-r from-[#00F0FF] to-[#B026FF] rounded-xl text-2xl font-bold text-black overflow-hidden"
+                className="group relative px-12 py-6 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-xl text-2xl font-bold text-black overflow-hidden"
               >
                 <span className="relative z-10 flex items-center gap-3">
                   <Shield className="w-8 h-8" />
-                  START NOW
+                  LAUNCH PLATFORM
                   <motion.span
                     animate={{ x: [0, 5, 0] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
@@ -652,45 +472,18 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 py-12 px-6 bg-black/40 backdrop-blur-xl">
+      <footer className="border-t border-white/10 py-8 px-6 bg-black/40 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Shield className="w-6 h-6 text-[#00F0FF]" />
-                <span className="text-xl font-bold bg-gradient-to-r from-[#00F0FF] to-[#B026FF] bg-clip-text text-transparent">
-                  ZYNTRIX
-                </span>
-              </div>
-              <p className="text-gray-400 text-sm">
-                Next-generation cyber defense platform
-              </p>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <Shield className="w-6 h-6 text-[#3B82F6]" />
+              <span className="text-xl font-bold bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] bg-clip-text text-transparent">
+                ZYNTRIX
+              </span>
             </div>
-
-            {[
-              { title: 'Product', links: ['Scanner', 'Analytics', 'History', 'Extension'] },
-              { title: 'Resources', links: ['Documentation', 'API', 'Support', 'Blog'] },
-              { title: 'Company', links: ['About', 'Privacy', 'Terms', 'Contact'] }
-            ].map((section, i) => (
-              <div key={i}>
-                <h4 className="font-bold mb-4 text-[#00F0FF]">{section.title}</h4>
-                <ul className="space-y-2">
-                  {section.links.map((link, j) => (
-                    <li key={j}>
-                      <a href="#" className="text-gray-400 hover:text-[#00F0FF] transition text-sm">
-                        {link}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          <div className="border-t border-white/10 pt-8 text-center">
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-400 text-sm text-center">
               © 2026 ZYNTRIX. All rights reserved.
-              <span className="text-[#00F0FF]"> Secured by AI.</span>
+              <span className="text-[#3B82F6]"> Secured by AI.</span>
             </p>
           </div>
         </div>

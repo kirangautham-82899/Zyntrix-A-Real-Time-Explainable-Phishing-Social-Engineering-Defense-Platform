@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
-from backend.database import database
-from backend.ml_behavioral_model import behavioral_model
-from backend.models import BehavioralProfile
+from database import database
+from ml_behavioral_model import behavioral_model
+from models import BehavioralProfile
 from bson import ObjectId
 
 class BehavioralAnalyzer:

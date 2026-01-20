@@ -33,10 +33,10 @@ export default function ScannerPage() {
     const [scanResult, setScanResult] = useState<ScanResult | null>(null);
 
     const tabs = [
-        { id: 'url' as ScanType, label: 'URL', icon: LinkIcon, color: '#00F0FF' },
-        { id: 'email' as ScanType, label: 'Email', icon: Mail, color: '#B026FF' },
-        { id: 'sms' as ScanType, label: 'SMS', icon: MessageSquare, color: '#00FF41' },
-        { id: 'qr' as ScanType, label: 'QR Code', icon: QrCode, color: '#FF0055' },
+        { id: 'url' as ScanType, label: 'URL', icon: LinkIcon, color: '#3B82F6' },
+        { id: 'email' as ScanType, label: 'Email', icon: Mail, color: '#06B6D4' },
+        { id: 'sms' as ScanType, label: 'SMS', icon: MessageSquare, color: '#10B981' },
+        { id: 'qr' as ScanType, label: 'QR Code', icon: QrCode, color: '#EF4444' },
     ];
 
     const placeholders = {
@@ -66,7 +66,9 @@ export default function ScannerPage() {
                     apiResponse = await analyzeSMS(inputValue);
                     break;
                 case 'qr':
-                    throw new Error('QR code scanning not yet implemented');
+                    // Redirect to dedicated QR scanner page
+                    window.location.href = '/qr-scanner';
+                    return;
                 default:
                     throw new Error('Invalid scan type');
             }
@@ -129,9 +131,9 @@ export default function ScannerPage() {
 
     const getRiskColor = (level: RiskLevel) => {
         switch (level) {
-            case 'safe': return '#00FF41';
-            case 'suspicious': return '#FFD700';
-            case 'dangerous': return '#FF0055';
+            case 'safe': return '#10B981';
+            case 'suspicious': return '#F59E0B';
+            case 'dangerous': return '#EF4444';
         }
     };
 
@@ -144,13 +146,13 @@ export default function ScannerPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0A0E1A] text-white">
+        <div className="min-h-screen bg-[#0F172A] text-white">
             {/* Matrix Background */}
             <div className="fixed inset-0 pointer-events-none opacity-20">
                 <div className="absolute inset-0" style={{
                     backgroundImage: `
-                        linear-gradient(0deg, transparent 24%, rgba(0, 240, 255, 0.05) 25%, rgba(0, 240, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 240, 255, 0.05) 75%, rgba(0, 240, 255, 0.05) 76%, transparent 77%, transparent),
-                        linear-gradient(90deg, transparent 24%, rgba(0, 240, 255, 0.05) 25%, rgba(0, 240, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 240, 255, 0.05) 75%, rgba(0, 240, 255, 0.05) 76%, transparent 77%, transparent)
+                        linear-gradient(0deg, transparent 24%, rgba(59, 130, 246, 0.05) 25%, rgba(59, 130, 246, 0.05) 26%, transparent 27%, transparent 74%, rgba(59, 130, 246, 0.05) 75%, rgba(59, 130, 246, 0.05) 76%, transparent 77%, transparent),
+                        linear-gradient(90deg, transparent 24%, rgba(59, 130, 246, 0.05) 25%, rgba(59, 130, 246, 0.05) 26%, transparent 27%, transparent 74%, rgba(59, 130, 246, 0.05) 75%, rgba(59, 130, 246, 0.05) 76%, transparent 77%, transparent)
                     `,
                     backgroundSize: '50px 50px',
                 }} />
@@ -164,8 +166,8 @@ export default function ScannerPage() {
                     className="mb-12"
                 >
                     <div className="flex items-center gap-3 mb-2">
-                        <Terminal className="w-8 h-8 text-[#00F0FF]" />
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-[#00F0FF] to-[#B026FF] bg-clip-text text-transparent">
+                        <Terminal className="w-8 h-8 text-[#3B82F6]" />
+                        <h1 className="text-4xl font-bold bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] bg-clip-text text-transparent">
                             THREAT SCANNER
                         </h1>
                     </div>
@@ -176,15 +178,15 @@ export default function ScannerPage() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-8 p-8 rounded-xl bg-black/40 backdrop-blur-xl border border-[#00F0FF]/30"
+                    className="mb-8 p-8 rounded-xl bg-black/40 backdrop-blur-xl border border-[#3B82F6]/30"
                 >
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00F0FF] to-[#B026FF]" />
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4]" />
 
                     {/* Terminal Header */}
                     <div className="flex items-center gap-2 mb-6 pb-4 border-b border-white/10">
-                        <div className="w-3 h-3 rounded-full bg-[#FF0055]" />
-                        <div className="w-3 h-3 rounded-full bg-[#FFD700]" />
-                        <div className="w-3 h-3 rounded-full bg-[#00FF41]" />
+                        <div className="w-3 h-3 rounded-full bg-[#EF4444]" />
+                        <div className="w-3 h-3 rounded-full bg-[#F59E0B]" />
+                        <div className="w-3 h-3 rounded-full bg-[#10B981]" />
                         <span className="text-sm text-gray-400 ml-auto font-mono">ZYNTRIX Scanner v1.0.0</span>
                     </div>
 
@@ -217,35 +219,26 @@ export default function ScannerPage() {
                     {/* Input Area */}
                     <div className="space-y-4">
                         {activeTab === 'qr' ? (
-                            <div className="bg-white/5 border-2 border-dashed border-white/20 rounded-lg p-12 text-center hover:border-[#00F0FF]/50 transition-colors">
-                                <input
-                                    type="file"
-                                    id="qr-file-upload"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) {
-                                            setSelectedFile(file);
-                                            setInputValue(file.name);
-                                            console.log('QR image selected:', file.name);
-                                        }
-                                    }}
-                                />
-                                <label htmlFor="qr-file-upload" className="cursor-pointer block">
-                                    <QrCode className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                                    <p className="text-gray-300 mb-2">
-                                        {selectedFile ? `Selected: ${selectedFile.name}` : 'Click to upload QR code image'}
-                                    </p>
-                                    <p className="text-sm text-gray-500 font-mono">Supports JPG, PNG, WebP</p>
-                                </label>
+                            <div className="bg-white/5 border-2 border-dashed border-[#3B82F6]/30 rounded-lg p-12 text-center hover:border-[#3B82F6]/50 transition-colors">
+                                <QrCode className="w-16 h-16 text-[#3B82F6] mx-auto mb-4" />
+                                <h3 className="text-xl font-bold text-white mb-2">QR Code Scanner Available</h3>
+                                <p className="text-gray-300 mb-6">
+                                    Use our dedicated QR code scanner for image-based threat detection
+                                </p>
+                                <button
+                                    onClick={() => window.location.href = '/qr-scanner'}
+                                    className="px-8 py-3 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-lg font-bold hover:scale-105 transition-transform inline-flex items-center gap-2"
+                                >
+                                    <QrCode className="w-5 h-5" />
+                                    Go to QR Scanner
+                                </button>
                             </div>
                         ) : (
                             <textarea
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
                                 placeholder={placeholders[activeTab]}
-                                className="w-full px-6 py-4 bg-black/40 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:border-[#00F0FF] focus:outline-none transition-colors font-mono resize-none"
+                                className="w-full px-6 py-4 bg-black/40 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:border-[#3B82F6] focus:outline-none transition-colors font-mono resize-none"
                                 rows={4}
                             />
                         )}
@@ -254,7 +247,7 @@ export default function ScannerPage() {
                             <button
                                 onClick={handleScan}
                                 disabled={!inputValue.trim() && activeTab !== 'qr' || isScanning}
-                                className="flex-1 px-6 py-3 bg-gradient-to-r from-[#00F0FF] to-[#B026FF] rounded-lg font-bold hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+                                className="flex-1 px-6 py-3 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-lg font-bold hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
                             >
                                 {isScanning ? (
                                     <>
@@ -330,7 +323,7 @@ export default function ScannerPage() {
                             {/* Factors */}
                             <div className="p-6 rounded-xl bg-black/40 backdrop-blur-xl border border-white/10">
                                 <div className="flex items-center gap-2 mb-4">
-                                    <TrendingUp className="w-5 h-5 text-[#00F0FF]" />
+                                    <TrendingUp className="w-5 h-5 text-[#3B82F6]" />
                                     <h4 className="text-xl font-bold">Detection Factors</h4>
                                 </div>
                                 <div className="space-y-3">
@@ -339,8 +332,8 @@ export default function ScannerPage() {
                                             <div className="flex items-start gap-2">
                                                 <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0`}
                                                     style={{
-                                                        backgroundColor: factor.impact === 'positive' ? '#00FF41' :
-                                                            factor.impact === 'negative' ? '#FF0055' : '#666'
+                                                        backgroundColor: factor.impact === 'positive' ? '#10B981' :
+                                                            factor.impact === 'negative' ? '#EF4444' : '#666'
                                                     }}
                                                 />
                                                 <div className="flex-1">
@@ -356,13 +349,13 @@ export default function ScannerPage() {
                             {/* Recommendations */}
                             <div className="p-6 rounded-xl bg-black/40 backdrop-blur-xl border border-white/10">
                                 <div className="flex items-center gap-2 mb-4">
-                                    <Shield className="w-5 h-5 text-[#B026FF]" />
+                                    <Shield className="w-5 h-5 text-[#06B6D4]" />
                                     <h4 className="text-xl font-bold">Recommendations</h4>
                                 </div>
                                 <div className="space-y-3">
                                     {scanResult.recommendations.map((rec, index) => (
                                         <div key={index} className="flex items-start gap-3">
-                                            <CheckCircle2 className="w-5 h-5 text-[#00FF41] flex-shrink-0 mt-0.5" />
+                                            <CheckCircle2 className="w-5 h-5 text-[#10B981] flex-shrink-0 mt-0.5" />
                                             <p className="text-gray-300">{rec}</p>
                                         </div>
                                     ))}
@@ -373,10 +366,10 @@ export default function ScannerPage() {
                         {/* Stats */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             {[
-                                { icon: Clock, label: 'Analysis Time', value: '342ms', color: '#00F0FF' },
-                                { icon: Target, label: 'Factors Analyzed', value: '12', color: '#B026FF' },
-                                { icon: Zap, label: 'Detection Engine', value: 'Hybrid AI', color: '#FFD700' },
-                                { icon: Shield, label: 'Processing', value: 'Encrypted', color: '#00FF41' },
+                                { icon: Clock, label: 'Analysis Time', value: '342ms', color: '#3B82F6' },
+                                { icon: Target, label: 'Factors Analyzed', value: '12', color: '#06B6D4' },
+                                { icon: Zap, label: 'Detection Engine', value: 'Hybrid AI', color: '#F59E0B' },
+                                { icon: Shield, label: 'Processing', value: 'Encrypted', color: '#10B981' },
                             ].map((stat, i) => (
                                 <div key={i} className="p-4 rounded-xl bg-black/40 backdrop-blur-xl border border-white/10 text-center">
                                     <stat.icon className="w-8 h-8 mx-auto mb-2" style={{ color: stat.color }} />
@@ -393,10 +386,10 @@ export default function ScannerPage() {
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="p-6 rounded-xl bg-black/40 backdrop-blur-xl border border-[#00F0FF]/30"
+                        className="p-6 rounded-xl bg-black/40 backdrop-blur-xl border border-[#3B82F6]/30"
                     >
                         <div className="flex items-start gap-3">
-                            <Info className="w-5 h-5 text-[#00F0FF] flex-shrink-0 mt-0.5" />
+                            <Info className="w-5 h-5 text-[#3B82F6] flex-shrink-0 mt-0.5" />
                             <div>
                                 <h4 className="font-semibold text-white mb-1">How it works</h4>
                                 <p className="text-sm text-gray-400">

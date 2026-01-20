@@ -4,8 +4,29 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Activity, ShieldAlert, UserCheck, TrendingUp } from 'lucide-react';
 
+interface Anomaly {
+    id: number;
+    user: string;
+    type: string;
+    time: string;
+    severity: 'critical' | 'high' | 'medium' | 'low';
+}
+
+interface RiskTrendItem {
+    day: string;
+    score: number;
+}
+
+interface BehavioralStats {
+    avgRiskScore: number;
+    anomaliesDetected: number;
+    activeProfiles: number;
+    riskTrend: RiskTrendItem[];
+    recentAnomalies: Anomaly[];
+}
+
 export default function BehavioralInsights() {
-    const [stats, setStats] = useState<any>(null);
+    const [stats, setStats] = useState<BehavioralStats | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -58,21 +79,21 @@ export default function BehavioralInsights() {
                     <StatCard
                         icon={<TrendingUp size={24} />}
                         title="Avg Organization Risk"
-                        value={stats.avgRiskScore}
+                        value={stats?.avgRiskScore ?? 0}
                         color="cyan"
                         subtext="+5% from last week"
                     />
                     <StatCard
                         icon={<ShieldAlert size={24} />}
                         title="Anomalies Detected"
-                        value={stats.anomaliesDetected}
+                        value={stats?.anomaliesDetected ?? 0}
                         color="red"
                         subtext="Last 24 hours"
                     />
                     <StatCard
                         icon={<UserCheck size={24} />}
                         title="Active Monitored Profiles"
-                        value={stats.activeProfiles}
+                        value={stats?.activeProfiles ?? 0}
                         color="green"
                         subtext="All systems normal"
                     />
@@ -91,7 +112,7 @@ export default function BehavioralInsights() {
                             Recent Anomalies
                         </h2>
                         <div className="space-y-4">
-                            {stats.recentAnomalies.map((anomaly: any) => (
+                            {stats?.recentAnomalies.map((anomaly: Anomaly) => (
                                 <div key={anomaly.id} className="bg-gray-700/50 p-4 rounded-lg flex items-center justify-between border-l-4 border-red-500">
                                     <div>
                                         <p className="text-white font-medium">{anomaly.type}</p>
@@ -99,8 +120,8 @@ export default function BehavioralInsights() {
                                     </div>
                                     <div className="text-right">
                                         <span className={`text-xs px-2 py-1 rounded-full ${anomaly.severity === 'critical' ? 'bg-red-500/20 text-red-300' :
-                                                anomaly.severity === 'high' ? 'bg-orange-500/20 text-orange-300' :
-                                                    'bg-yellow-500/20 text-yellow-300'
+                                            anomaly.severity === 'high' ? 'bg-orange-500/20 text-orange-300' :
+                                                'bg-yellow-500/20 text-yellow-300'
                                             }`}>
                                             {anomaly.severity.toUpperCase()}
                                         </span>
@@ -154,7 +175,15 @@ export default function BehavioralInsights() {
     );
 }
 
-function StatCard({ icon, title, value, color, subtext }: any) {
+interface StatCardProps {
+    icon: React.ReactNode;
+    title: string;
+    value: number;
+    color: 'cyan' | 'red' | 'green';
+    subtext: string;
+}
+
+function StatCard({ icon, title, value, color, subtext }: StatCardProps) {
     const colors = {
         cyan: 'from-cyan-500 to-blue-500',
         red: 'from-red-500 to-pink-500',
