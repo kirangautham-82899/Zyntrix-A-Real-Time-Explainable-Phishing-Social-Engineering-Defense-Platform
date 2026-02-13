@@ -60,12 +60,12 @@ async function handleUrlCheck(url, sendResponse) {
         console.log('📊 API Response:', data);
         console.log('⚠️ Risk Score:', data.data?.risk_score);
 
-        // VERY LOW THRESHOLD: Block if score > 20 (was 40)
-        // This makes extension block most suspicious URLs
-        if (data.data && data.data.risk_score > 20) {
+        // LOW THRESHOLD: Block if score > 15
+        // This makes extension block ALL suspicious and dangerous URLs
+        if (data.data && data.data.risk_score > 15) {
             console.log('🚫 BLOCKING - Risk score too high!');
             sendResponse({
-                status: 'dangerous',
+                status: 'dangerous', // Treat both suspicious and dangerous as "dangerous" for blocking
                 score: data.data.risk_score,
                 details: data.data
             });

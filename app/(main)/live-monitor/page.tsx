@@ -83,13 +83,14 @@ export default function LiveMonitorPage() {
                             break;
 
                         case 'threat_alert':
-                            // Add new threat to feed
-                            setThreats(prev => [message.data, ...prev].slice(0, 50));
-                            break;
-
                         case 'scan_complete':
-                            // Add scan result to feed
-                            setThreats(prev => [message.data, ...prev].slice(0, 50));
+                            // Add new threat to feed, avoiding duplicates
+                            setThreats(prev => {
+                                const newThreat = message.data;
+                                // Filter out if it already exists to avoid duplicates
+                                const filtered = prev.filter(t => t.id !== newThreat.id);
+                                return [newThreat, ...filtered].slice(0, 50);
+                            });
                             break;
 
                         case 'stats_update':
